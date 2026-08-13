@@ -134,10 +134,8 @@ enum NothingTheme {
         static let buttonTarget: CGFloat = 44
         /// Transitions are percussive — a short ease-out, never a spring.
         static let transition: TimeInterval = 0.15
-        /// Last-print tape: long enough to read (150ms often never paints), short
-        /// enough to stay a tick. Matches the 300ms transition band and common
-        /// watchlist last-price flashes (250–400ms).
-        static let printFlash: TimeInterval = 0.30
+        /// Last-print tape. Nothing micro token — a tick, not a linger.
+        static let printFlash: TimeInterval = 0.15
     }
 }
 
