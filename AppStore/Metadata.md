@@ -8,8 +8,13 @@
 - **Primary category:** Finance
 - **Price:** Free
 - **Bundle ID:** `attackonmorty.tickbyte`
-- **Version:** 1.0
+- **Version:** 1.1
+- **Build:** 2
 - **Age rating:** 4+
+
+## What's New (1.1)
+
+One focused coin now sits in a large price with a UTC-day sparkline. The other coin is a compact row — click it to promote it. The panel is quieter: no extra labels on the number.
 
 ## Promotional text
 
