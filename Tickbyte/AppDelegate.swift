@@ -188,8 +188,10 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         }
     }
 
-    private func refreshPanel() {
-        panelController.contentView.update(with: makeSnapshot())
+    /// - Parameter animatePrice: true only for a live print the user is watching.
+    ///   Open, REST refresh, connection, and focus just set the number.
+    private func refreshPanel(animatePrice: Bool = false) {
+        panelController.contentView.update(with: makeSnapshot(), animatePrice: animatePrice)
     }
 
     private func makeSnapshot() -> PanelSnapshot {
@@ -233,7 +235,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     /// status-bar timer already covers the visible UI, so we do nothing (F6).
     @objc private func dataDidChange(_ notification: Notification) {
         guard webSocketManager.isPanelVisible else { return }
-        refreshPanel()
+        refreshPanel(animatePrice: notification.name == .priceUpdated)
     }
 }
 

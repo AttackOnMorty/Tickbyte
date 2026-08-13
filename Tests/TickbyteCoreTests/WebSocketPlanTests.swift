@@ -95,4 +95,20 @@ final class WebSocketPlanTests: XCTestCase {
     func testIsCurrentSocketFalseWhenNoCurrentSocket() {
         XCTAssertFalse(WebSocketPlan.isCurrentSocket(NSObject(), current: nil))
     }
+
+    // MARK: REST lastPrice vs live socket
+
+    func testRestDoesNotOverwriteALivePrint() {
+        XCTAssertFalse(WebSocketPlan.restShouldWritePrice(hasPrice: true, hasLiveSocket: true))
+    }
+
+    func testRestSeedsWhenThereIsNoPriceYet() {
+        XCTAssertTrue(WebSocketPlan.restShouldWritePrice(hasPrice: false, hasLiveSocket: true))
+        XCTAssertTrue(WebSocketPlan.restShouldWritePrice(hasPrice: false, hasLiveSocket: false))
+    }
+
+    func testRestWritesPriceWhenThereIsNoLiveSocket() {
+        // Hidden coin, or a dead connection whose task is already gone.
+        XCTAssertTrue(WebSocketPlan.restShouldWritePrice(hasPrice: true, hasLiveSocket: false))
+    }
 }

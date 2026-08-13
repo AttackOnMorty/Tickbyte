@@ -126,11 +126,15 @@ final class HeroCoinView: NSView {
     @available(*, unavailable)
     required init?(coder: NSCoder) { fatalError("init(coder:) has not been implemented") }
 
-    func update(with coin: PanelSnapshot.Coin) {
+    func update(with coin: PanelSnapshot.Coin, animated: Bool = false) {
         pairLabel.text = coin.pair
         changeLabel.text = coin.change.text
         changeLabel.textColor = PanelText.changeColorRole(coin.change.direction).color
-        flashPrice(ifChangedTo: coin.price)
+        if animated {
+            flashPrice(ifChangedTo: coin.price)
+        } else {
+            priceLabel.text = coin.price
+        }
         dayChartView.state = coin.dayChart
     }
 
@@ -380,7 +384,7 @@ final class TickerPanelView: NSView {
 
     // MARK: Refresh
 
-    func update(with snapshot: PanelSnapshot) {
+    func update(with snapshot: PanelSnapshot, animatePrice: Bool = false) {
         let statusText = snapshot.feedStatus.footerText
         statusLabel.text = statusText ?? ""
         statusLabel.isHidden = statusText == nil
@@ -393,7 +397,7 @@ final class TickerPanelView: NSView {
         let bySymbol = Dictionary(uniqueKeysWithValues: snapshot.coins.map { ($0.symbol, $0) })
 
         if let heroSymbol = board.hero, let coin = bySymbol[heroSymbol] {
-            heroSection.update(with: coin)
+            heroSection.update(with: coin, animated: animatePrice)
             heroSection.isHidden = false
         } else {
             heroSection.isHidden = true

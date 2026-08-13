@@ -45,6 +45,13 @@ enum WebSocketPlan {
         if case .connecting = state { return true }
         return false
     }
+
+    /// REST `lastPrice` seeds a hole or a coin with no live socket. A live socket
+    /// already owns the print — writing a snapshot over it is what made the hero twitch
+    /// on panel open.
+    static func restShouldWritePrice(hasPrice: Bool, hasLiveSocket: Bool) -> Bool {
+        !hasPrice || !hasLiveSocket
+    }
 }
 
 /// Exponential reconnect backoff with a ceiling, so a sustained outage retries on a

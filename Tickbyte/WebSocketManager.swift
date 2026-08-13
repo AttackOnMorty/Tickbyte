@@ -156,7 +156,14 @@ class WebSocketManager {
             // Already back on the main actor after the await. No notification here (F9):
             // the status bar reads state via its timer, and the menu refreshes explicitly
             // after its on-open fetch batch — posting per symbol caused redundant refreshes.
-            prices[symbol] = PriceFormatter.price(ticker.lastPrice)
+            // The socket owns last price. REST lastPrice only seeds a hole or a
+            // socket-less coin — overwriting a live print made the hero twitch on open.
+            if WebSocketPlan.restShouldWritePrice(
+                hasPrice: prices[symbol] != nil,
+                hasLiveSocket: webSocketTasks[symbol] != nil
+            ) {
+                prices[symbol] = PriceFormatter.price(ticker.lastPrice)
+            }
             priceChanges[symbol] = ticker.priceChangePercent
         } catch {
             logger.error("Failed to fetch UTC trading-day ticker for \(symbol): \(error.localizedDescription)")
