@@ -1,7 +1,13 @@
 # Tickbyte
 
-<img src="AppStore/Screenshots/Tickbyte-1440x900-v5.png" alt="Tickbyte" width="720" />
+Real-time Bitcoin and Ethereum prices in the Mac menu bar — the moment a trade happens.
 
-Live Bitcoin and Ethereum prices in the Mac menu bar, updated as each trade arrives — no polling, no refresh delay.
+<p align="center">
+  <img src="AppStore/Screenshots/Tickbyte-1440x900-v5.png" alt="Tickbyte" width="720">
+</p>
 
-[Mac App Store](https://apps.apple.com/search?term=Tickbyte%20Live%20Crypto%20Prices)
+<p align="center">
+  <a href="https://apps.apple.com/search?term=Tickbyte%20Live%20Crypto%20Prices">
+    <img src="https://developer.apple.com/assets/elements/badges/download-on-the-mac-app-store.svg" alt="Download on the Mac App Store" width="160">
+  </a>
+</p>
