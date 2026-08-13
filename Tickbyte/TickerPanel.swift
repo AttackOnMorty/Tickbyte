@@ -12,6 +12,7 @@
 
 import AppKit
 import QuartzCore
+import os.log
 
 /// Everything the panel needs to draw itself, already resolved by the caller.
 struct PanelSnapshot {
@@ -72,6 +73,7 @@ final class HeroCoinView: NSView {
     private let dayChartView: DayChartView
     /// Cancels a pending ink restore when a newer print arrives mid-tick.
     private var flashGeneration = 0
+    private let logger = Logger(subsystem: AppConfiguration.Logging.subsystem, category: "Hero")
 
     init() {
         pairLabel = NothingLabel(
@@ -134,7 +136,7 @@ final class HeroCoinView: NSView {
         changeLabel.textColor = PanelText.changeColorRole(coin.change.direction).color
         if animated {
             flashLastPrint(to: coin.price)
-        } else {
+        } else if priceLabel.text != coin.price {
             flashGeneration += 1
             priceLabel.text = coin.price
             priceLabel.textColor = NothingTheme.Palette.textDisplay
@@ -146,9 +148,12 @@ final class HeroCoinView: NSView {
     /// sharp — colour is the event. Reduced motion just sets the number.
     private func flashLastPrint(to newPrice: String) {
         let previous = priceLabel.text
+        // A same-display print must not cancel an in-flight tick (ETH updates used to).
+        guard previous != newPrice else { return }
         priceLabel.text = newPrice
         let reduceMotion = NSWorkspace.shared.accessibilityDisplayShouldReduceMotion
         let direction = PanelText.lastPrintDirection(from: previous, to: newPrice)
+        logger.info("hero \(previous, privacy: .public) -> \(newPrice, privacy: .public) \(String(describing: direction), privacy: .public) reduceMotion=\(reduceMotion)")
         guard !previous.isEmpty, direction != .flat, !reduceMotion else {
             flashGeneration += 1
             priceLabel.textColor = NothingTheme.Palette.textDisplay

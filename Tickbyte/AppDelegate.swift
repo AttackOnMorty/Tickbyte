@@ -235,7 +235,11 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     /// status-bar timer already covers the visible UI, so we do nothing (F6).
     @objc private func dataDidChange(_ notification: Notification) {
         guard webSocketManager.isPanelVisible else { return }
-        refreshPanel(animatePrice: notification.name == .priceUpdated)
+        let changed = notification.object as? String
+        // Only the hero flashes, and only for its own print. An ETH trade used to
+        // refresh the board as "animated" and wipe BTC's tape tick back to ink.
+        let animatePrice = notification.name == .priceUpdated && changed == focusedSymbol
+        refreshPanel(animatePrice: animatePrice)
     }
 }
 
