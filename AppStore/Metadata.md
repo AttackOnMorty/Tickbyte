@@ -9,7 +9,7 @@
 - **Price:** Free
 - **Bundle ID:** `attackonmorty.tickbyte`
 - **Version:** 1.1
-- **Build:** 2
+- **Build:** 4
 - **Age rating:** 4+
 
 ## What's New (1.1)
