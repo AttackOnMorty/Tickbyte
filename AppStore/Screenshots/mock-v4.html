@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Tickbyte 1440×900 v4</title>
+  <style>
+    @font-face {
+      font-family: "Space Grotesk";
+      src: url("../../Tickbyte/Fonts/SpaceGrotesk.ttf") format("truetype");
+      font-weight: 400;
+    }
+    @font-face {
+      font-family: "Space Mono";
+      src: url("../../Tickbyte/Fonts/SpaceMono-Regular.ttf") format("truetype");
+      font-weight: 400;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body { width: 1440px; height: 900px; overflow: hidden; }
+    body {
+      display: flex;
+      flex-direction: column;
+      background: #F5F5F5;
+      color: #000;
+    }
+
+    .menubar {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 24px;
+      height: 40px;
+      padding: 0 28px;
+      background: #E8E8E8;
+      border-bottom: 1px solid #CCC;
+      font-family: "Space Mono", monospace;
+      font-size: 12px;
+    }
+    .menubar .code { color: #666; margin-right: 6px; }
+    .menubar .val { color: #000; }
+
+    .stage {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 40px;
+      padding: 40px 64px 48px;
+    }
+
+    .brand { flex: 1; min-width: 0; }
+    .identity {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      margin-bottom: 28px;
+    }
+    .identity img {
+      width: 52px;
+      height: 52px;
+      border-radius: 10px;
+    }
+    .identity span {
+      font-family: "Space Grotesk", sans-serif;
+      font-size: 18px;
+      letter-spacing: 0.08em;
+    }
+    h1 {
+      max-width: 14ch;
+      font-family: "Space Grotesk", sans-serif;
+      font-size: 76px;
+      font-weight: 400;
+      letter-spacing: -0.03em;
+      line-height: 0.94;
+    }
+    .lede {
+      margin-top: 20px;
+      font-family: "Space Mono", monospace;
+      font-size: 13px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: #666;
+    }
+    .facts {
+      display: grid;
+      gap: 14px;
+      margin-top: 40px;
+      max-width: 420px;
+      font-family: "Space Mono", monospace;
+      font-size: 12px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: #666;
+    }
+    .facts div { display: flex; gap: 16px; }
+    .facts span { color: #999; }
+
+    .panel {
+      flex: 0 0 400px;
+      width: 400px;
+      padding: 28px;
+      background: #FFF;
+      border: 1px solid #CCC;
+      border-radius: 8px;
+    }
+    .row {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+    }
+    .pair, .wordmark, .quit, .compact-pair {
+      font-family: "Space Mono", monospace;
+      font-size: 11px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: #666;
+    }
+    .change, .compact-change {
+      font-family: "Space Mono", monospace;
+      color: #D71921;
+    }
+    .change { font-size: 16px; }
+    .compact-change {
+      font-size: 11px;
+      letter-spacing: 0;
+    }
+    .hero-price {
+      margin-top: 8px;
+      font-family: "Space Mono", monospace;
+      font-size: 48px;
+      font-weight: 400;
+      line-height: 1.05;
+      color: #000;
+    }
+    .chart { margin-top: 16px; }
+    .chart svg { width: 100%; height: 32px; display: block; }
+    .compact {
+      display: flex;
+      align-items: center;
+      min-height: 44px;
+      margin-top: 48px;
+    }
+    .compact-pair { flex: 1; }
+    .compact-price {
+      font-family: "Space Mono", monospace;
+      font-size: 16px;
+      color: #000;
+      margin-right: 16px;
+    }
+    .footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-top: 32px;
+      min-height: 44px;
+    }
+    .wordmark {
+      font-family: "Space Grotesk", sans-serif;
+      letter-spacing: 0;
+      text-transform: none;
+      color: #999;
+    }
+    .quit {
+      font-family: "Space Mono", monospace;
+      font-size: 11px;
+      letter-spacing: 0.08em;
+      color: #666;
+    }
+  </style>
+</head>
+<body>
+  <header class="menubar" aria-hidden="true">
+    <span><span class="code">BTC</span><span class="val">64,556</span></span>
+    <span><span class="code">ETH</span><span class="val">1,889</span></span>
+  </header>
+
+  <div class="stage">
+    <section class="brand">
+      <div class="identity">
+        <img src="../../Tickbyte/AppIcon.icon/Assets/AppIcon-1024.png" alt="" />
+        <span>TICKBYTE</span>
+      </div>
+      <h1>Live crypto.<br>Right in your<br>menu bar.</h1>
+      <p class="lede">See BTC + ETH move in real time.</p>
+      <div class="facts">
+        <div><span>01</span>Pushed as trades arrive</div>
+        <div><span>02</span>One focused coin, one compact row</div>
+        <div><span>03</span>No account · no ads · no polling</div>
+      </div>
+    </section>
+
+    <aside class="panel">
+      <div class="row">
+        <span class="pair">BTC/USDT</span>
+        <span class="change">+0.30%</span>
+      </div>
+      <div class="hero-price">64,556</div>
+      <div class="chart">
+        <svg viewBox="0 0 344 32" preserveAspectRatio="none">
+          <polyline
+            fill="none"
+            stroke="#000"
+            stroke-width="1.5"
+            stroke-linejoin="round"
+            stroke-linecap="round"
+            points="0,20 14,18 28,21 42,15 56,16 70,12 84,14 98,11 112,13 126,9 140,14 154,11 168,18 182,15 196,12 210,13 224,10 238,8 252,11 266,7 280,9 294,6 308,7 322,5 344,6"
+          />
+          <circle cx="344" cy="6" r="2" fill="#000" />
+        </svg>
+      </div>
+
+      <div class="compact">
+        <span class="compact-pair">ETH/USDT</span>
+        <span class="compact-price">1,889</span>
+        <span class="compact-change">+0.83%</span>
+      </div>
+
+      <div class="footer">
+        <span class="wordmark">TICKBYTE</span>
+        <span class="quit">[ QUIT ]</span>
+      </div>
+    </aside>
+  </div>
+</body>
+</html>
