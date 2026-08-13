@@ -70,6 +70,24 @@ final class PanelTextTests: XCTestCase {
         XCTAssertEqual(PanelText.changeColorRole(.flat), .disabled)
     }
 
+    func testLastPrintDirectionComparesThisPrintToTheLast() {
+        XCTAssertEqual(PanelText.lastPrintDirection(from: "64,556", to: "64,557"), .up)
+        XCTAssertEqual(PanelText.lastPrintDirection(from: "64,557", to: "64,556"), .down)
+        XCTAssertEqual(PanelText.lastPrintDirection(from: "64,556", to: "64,556"), .flat)
+    }
+
+    func testLastPrintDirectionReadsGroupedAndDecimalDisplay() {
+        XCTAssertEqual(PanelText.lastPrintDirection(from: "1,889", to: "1,890"), .up)
+        XCTAssertEqual(PanelText.lastPrintDirection(from: "9.99", to: "10.00"), .up)
+        XCTAssertEqual(PanelText.lastPrintDirection(from: "10.00", to: "9.99"), .down)
+    }
+
+    func testLastPrintDirectionIsFlatWhenASideIsUnparseable() {
+        XCTAssertEqual(PanelText.lastPrintDirection(from: "", to: "64,556"), .flat)
+        XCTAssertEqual(PanelText.lastPrintDirection(from: "—", to: "64,556"), .flat)
+        XCTAssertEqual(PanelText.lastPrintDirection(from: "64,556", to: "—"), .flat)
+    }
+
     func testBoardPromotesTheFocusedCoinAndKeepsTheRestCompact() {
         let board = PanelBoard.arrange(focused: "ethusdt", symbols: ["btcusdt", "ethusdt"])
         XCTAssertEqual(board.hero, "ethusdt")

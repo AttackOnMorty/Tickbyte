@@ -70,6 +70,8 @@ final class HeroCoinView: NSView {
     private let changeLabel: NothingLabel
     private let priceLabel: NothingLabel
     private let dayChartView: DayChartView
+    /// Cancels a pending ink restore when a newer print arrives mid-tick.
+    private var flashGeneration = 0
 
     init() {
         pairLabel = NothingLabel(
@@ -131,23 +133,34 @@ final class HeroCoinView: NSView {
         changeLabel.text = coin.change.text
         changeLabel.textColor = PanelText.changeColorRole(coin.change.direction).color
         if animated {
-            flashPrice(ifChangedTo: coin.price)
+            flashLastPrint(to: coin.price)
         } else {
+            flashGeneration += 1
             priceLabel.text = coin.price
+            priceLabel.textColor = NothingTheme.Palette.textDisplay
         }
         dayChartView.state = coin.dayChart
     }
 
-    /// A short ease-out fade-in when the print moves — click, not swoosh.
-    private func flashPrice(ifChangedTo newPrice: String) {
+    /// Paint tape on the hero for one tick, then return to ink. The number stays
+    /// sharp — colour is the event. Reduced motion just sets the number.
+    private func flashLastPrint(to newPrice: String) {
         let previous = priceLabel.text
         priceLabel.text = newPrice
-        guard !previous.isEmpty, previous != newPrice else { return }
-        priceLabel.alphaValue = 0.35
-        NSAnimationContext.runAnimationGroup { context in
-            context.duration = NothingTheme.Metric.transition
-            context.timingFunction = CAMediaTimingFunction(controlPoints: 0.25, 0.1, 0.25, 1)
-            priceLabel.animator().alphaValue = 1
+        let reduceMotion = NSWorkspace.shared.accessibilityDisplayShouldReduceMotion
+        let direction = PanelText.lastPrintDirection(from: previous, to: newPrice)
+        guard !previous.isEmpty, direction != .flat, !reduceMotion else {
+            flashGeneration += 1
+            priceLabel.textColor = NothingTheme.Palette.textDisplay
+            return
+        }
+
+        priceLabel.textColor = PanelText.changeColorRole(direction).color
+        flashGeneration += 1
+        let generation = flashGeneration
+        DispatchQueue.main.asyncAfter(deadline: .now() + NothingTheme.Metric.transition) { [weak self] in
+            guard let self, self.flashGeneration == generation else { return }
+            self.priceLabel.textColor = NothingTheme.Palette.textDisplay
         }
     }
 }
