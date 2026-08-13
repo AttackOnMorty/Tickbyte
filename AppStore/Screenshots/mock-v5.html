@@ -19,25 +19,24 @@
     html, body { width: 1440px; height: 900px; overflow: hidden; }
     body {
       display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 48px;
-      padding: 48px 56px;
-      background: #F3EFE6;
+      align-items: stretch;
+      justify-content: space-between;
+      padding: 57px 90px 57px 96px;
+      background: #F5F4F1;
       color: #111;
     }
 
-    .brand { flex: 0 0 auto; }
+    .brand { flex: 1 1 auto; min-width: 0; padding-right: 48px; }
     .identity {
       display: flex;
       align-items: center;
       gap: 16px;
-      margin-bottom: 28px;
+      margin-bottom: 104px;
     }
     .identity img {
-      width: 68px;
-      height: 68px;
-      border-radius: 14px;
+      width: 84px;
+      height: 84px;
+      border-radius: 16px;
     }
     .identity span {
       font-family: "Space Grotesk", sans-serif;
@@ -47,14 +46,14 @@
     }
     h1 {
       font-family: "Space Grotesk", sans-serif;
-      font-size: 76px;
+      font-size: 80px;
       font-weight: 700;
       letter-spacing: -0.035em;
       line-height: 0.9;
       text-transform: uppercase;
     }
     .lede {
-      margin-top: 28px;
+      margin-top: 123px;
       font-family: "Space Mono", monospace;
       font-size: 16px;
       letter-spacing: 0.1em;
@@ -63,12 +62,14 @@
     }
 
     .panel {
-      flex: 0 0 480px;
-      width: 480px;
-      padding: 40px 40px 32px;
-      background: #F7F5F1;
-      border: 1px solid #D9D4CB;
-      border-radius: 14px;
+      flex: 0 0 465px;
+      width: 465px;
+      display: flex;
+      flex-direction: column;
+      padding: 36px 36px 28px;
+      background: #F8F8F8;
+      border: 1px solid #D8D8D8;
+      border-radius: 16px;
     }
     .row {
       display: flex;
@@ -90,7 +91,7 @@
     .hero-price {
       margin-top: 12px;
       font-family: "Space Mono", monospace;
-      font-size: 72px;
+      font-size: 64px;
       line-height: 1.02;
     }
     .chart { margin-top: 24px; }
@@ -99,7 +100,7 @@
       display: flex;
       align-items: center;
       min-height: 56px;
-      margin-top: 56px;
+      margin-top: auto;
     }
     .compact-pair { flex: 1; }
     .compact-price {
@@ -116,8 +117,8 @@
       display: flex;
       align-items: center;
       justify-content: flex-end;
-      margin-top: 40px;
-      min-height: 48px;
+      margin-top: 32px;
+      min-height: 40px;
     }
   </style>
 </head>
