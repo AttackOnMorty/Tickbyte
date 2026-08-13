@@ -12,7 +12,6 @@
 
 import AppKit
 import QuartzCore
-import os.log
 
 /// Everything the panel needs to draw itself, already resolved by the caller.
 struct PanelSnapshot {
@@ -73,7 +72,6 @@ final class HeroCoinView: NSView {
     private let dayChartView: DayChartView
     /// Cancels a pending ink restore when a newer print arrives mid-tick.
     private var flashGeneration = 0
-    private let logger = Logger(subsystem: AppConfiguration.Logging.subsystem, category: "Hero")
 
     init() {
         pairLabel = NothingLabel(
@@ -152,7 +150,6 @@ final class HeroCoinView: NSView {
         guard previous != newPrice else { return }
         priceLabel.text = newPrice
         let direction = PanelText.lastPrintDirection(from: previous, to: newPrice)
-        logger.info("hero \(previous, privacy: .public) -> \(newPrice, privacy: .public) \(String(describing: direction), privacy: .public)")
         guard !previous.isEmpty, direction != .flat else {
             flashGeneration += 1
             priceLabel.apply(color: NothingTheme.Palette.textDisplay)

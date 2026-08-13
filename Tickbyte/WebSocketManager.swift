@@ -335,12 +335,7 @@ class WebSocketManager {
             return
         }
 
-        let display = PriceFormatter.price(priceStr)
-        if symbol == "btcusdt" {
-            let previous = prices[symbol] ?? ""
-            logger.info("BTC ws raw=\(priceStr, privacy: .public) display=\(display, privacy: .public) was=\(previous, privacy: .public) tick=\(previous != display)")
-        }
-        prices[symbol] = display
+        prices[symbol] = PriceFormatter.price(priceStr)
         if isPanelVisible { // F7: only refresh the panel when it is actually on screen
             // F5: name the changed symbol so the delegate refreshes just that one row.
             NotificationCenter.default.post(name: .priceUpdated, object: symbol)
