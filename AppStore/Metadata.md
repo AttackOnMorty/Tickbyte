@@ -14,7 +14,7 @@
 
 ## What's New (1.1)
 
-One focused coin now sits in a large price with a UTC-day sparkline. The other coin is a compact row — click it to promote it. The panel is quieter: no extra labels on the number.
+One focused coin now sits in a large price with today’s sparkline. The other coin is a compact row — click it to promote it.
 
 ## Promotional text
 
