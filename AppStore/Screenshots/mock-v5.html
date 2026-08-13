@@ -18,92 +18,57 @@
     * { box-sizing: border-box; margin: 0; padding: 0; }
     html, body { width: 1440px; height: 900px; overflow: hidden; }
     body {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 48px;
+      padding: 48px 56px;
       background: #F3EFE6;
       color: #111;
     }
 
-    /* Real menu-bar app shots hang the dropdown from the bar
-       (Tietze / Hackworth). The cream is desktop, not a hole. */
-    .menubar {
-      display: flex;
-      align-items: center;
-      height: 28px;
-      padding: 0 16px 0 20px;
-      background: #EBE6DC;
-      border-bottom: 1px solid #D9D4CB;
-      font-family: "Space Mono", monospace;
-      font-size: 12px;
-    }
-    .menubar .app {
-      font-family: "Space Grotesk", sans-serif;
-      font-size: 13px;
-      font-weight: 500;
-      letter-spacing: 0.04em;
-    }
-    .menubar .grow { flex: 1; }
-    .menubar .tick { margin-right: 20px; }
-    .menubar .code { color: #8A8680; margin-right: 6px; }
-    .menubar .clock {
-      color: #8A8680;
-      font-size: 12px;
-      margin-right: 128px;
-    }
-
-    .desktop {
-      position: relative;
-      height: 872px;
-    }
-
-    .copy {
-      position: absolute;
-      left: 72px;
-      top: 48px;
-      width: 620px;
-    }
+    .brand { flex: 0 0 auto; }
     .identity {
       display: flex;
       align-items: center;
-      gap: 14px;
+      gap: 16px;
       margin-bottom: 28px;
     }
     .identity img {
-      width: 56px;
-      height: 56px;
-      border-radius: 12px;
+      width: 68px;
+      height: 68px;
+      border-radius: 14px;
     }
     .identity span {
       font-family: "Space Grotesk", sans-serif;
-      font-size: 18px;
+      font-size: 22px;
       font-weight: 500;
       letter-spacing: 0.12em;
     }
     h1 {
       font-family: "Space Grotesk", sans-serif;
-      font-size: 64px;
+      font-size: 76px;
       font-weight: 700;
-      letter-spacing: -0.03em;
-      line-height: 0.92;
+      letter-spacing: -0.035em;
+      line-height: 0.9;
       text-transform: uppercase;
     }
     .lede {
-      margin-top: 24px;
+      margin-top: 28px;
       font-family: "Space Mono", monospace;
-      font-size: 14px;
+      font-size: 16px;
       letter-spacing: 0.1em;
       text-transform: uppercase;
       color: #8A8680;
     }
 
-    /* 6px under the bar, right-aligned to the ticker — same as the app. */
     .panel {
-      position: absolute;
-      top: 34px;
-      left: 880px;
-      width: 360px;
-      padding: 28px 28px 20px;
+      flex: 0 0 480px;
+      width: 480px;
+      padding: 40px 40px 32px;
       background: #F7F5F1;
       border: 1px solid #D9D4CB;
-      border-radius: 10px;
+      border-radius: 14px;
     }
     .row {
       display: flex;
@@ -112,47 +77,47 @@
     }
     .pair, .compact-pair, .quit, .wordmark {
       font-family: "Space Mono", monospace;
-      font-size: 11px;
+      font-size: 13px;
       letter-spacing: 0.08em;
       text-transform: uppercase;
       color: #8A8680;
     }
     .change {
       font-family: "Space Mono", monospace;
-      font-size: 16px;
+      font-size: 20px;
       color: #D71921;
     }
     .hero-price {
-      margin-top: 8px;
+      margin-top: 12px;
       font-family: "Space Mono", monospace;
-      font-size: 48px;
-      line-height: 1.05;
+      font-size: 72px;
+      line-height: 1.02;
     }
-    .chart { margin-top: 16px; }
-    .chart svg { width: 100%; height: 32px; display: block; }
+    .chart { margin-top: 24px; }
+    .chart svg { width: 100%; height: 56px; display: block; }
     .compact {
       display: flex;
       align-items: center;
-      min-height: 44px;
-      margin-top: 48px;
+      min-height: 56px;
+      margin-top: 56px;
     }
     .compact-pair { flex: 1; }
     .compact-price {
       font-family: "Space Mono", monospace;
-      font-size: 16px;
+      font-size: 22px;
       margin-right: 16px;
     }
     .compact-change {
       font-family: "Space Mono", monospace;
-      font-size: 11px;
+      font-size: 13px;
       color: #D71921;
     }
     .footer {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      margin-top: 32px;
-      min-height: 44px;
+      margin-top: 40px;
+      min-height: 48px;
     }
     .wordmark {
       font-family: "Space Grotesk", sans-serif;
@@ -163,53 +128,43 @@
   </style>
 </head>
 <body>
-  <header class="menubar">
-    <span class="app">Tickbyte</span>
-    <span class="grow"></span>
-    <span class="tick"><span class="code">BTC</span>64,556</span>
-    <span class="tick"><span class="code">ETH</span>1,889</span>
-    <span class="clock">9:41</span>
-  </header>
+  <section class="brand">
+    <div class="identity">
+      <img src="../../Tickbyte/AppIcon.icon/Assets/AppIcon-1024.png" alt="" />
+      <span>TICKBYTE</span>
+    </div>
+    <h1>Live crypto.<br>Right in your<br>menu bar.</h1>
+    <p class="lede">See BTC + ETH move in real time.</p>
+  </section>
 
-  <div class="desktop">
-    <section class="copy">
-      <div class="identity">
-        <img src="../../Tickbyte/AppIcon.icon/Assets/AppIcon-1024.png" alt="" />
-        <span>TICKBYTE</span>
-      </div>
-      <h1>Live crypto.<br>Right in your<br>menu bar.</h1>
-      <p class="lede">See BTC + ETH move in real time.</p>
-    </section>
-
-    <aside class="panel">
-      <div class="row">
-        <span class="pair">BTC/USDT</span>
-        <span class="change">+0.30%</span>
-      </div>
-      <div class="hero-price">64,556</div>
-      <div class="chart">
-        <svg viewBox="0 0 304 32" preserveAspectRatio="none">
-          <polyline
-            fill="none"
-            stroke="#111"
-            stroke-width="1.4"
-            stroke-linejoin="round"
-            stroke-linecap="round"
-            points="0,22 8,20 16,18 24,19 32,14 40,16 48,12 56,15 64,11 72,13 80,10 88,14 96,12 104,18 112,16 120,20 128,17 136,22 144,19 152,16 160,18 168,14 176,15 184,12 192,13 200,10 208,12 216,9 224,11 232,8 240,10 248,7 256,9 264,6 272,8 280,5 288,7 296,4 304,6"
-          />
-          <circle cx="304" cy="6" r="2" fill="#111" />
-        </svg>
-      </div>
-      <div class="compact">
-        <span class="compact-pair">ETH/USDT</span>
-        <span class="compact-price">1,889</span>
-        <span class="compact-change">+0.83%</span>
-      </div>
-      <div class="footer">
-        <span class="wordmark">TICKBYTE</span>
-        <span class="quit">[ QUIT ]</span>
-      </div>
-    </aside>
-  </div>
+  <aside class="panel">
+    <div class="row">
+      <span class="pair">BTC/USDT</span>
+      <span class="change">+0.30%</span>
+    </div>
+    <div class="hero-price">64,556</div>
+    <div class="chart">
+      <svg viewBox="0 0 400 56" preserveAspectRatio="none">
+        <polyline
+          fill="none"
+          stroke="#111"
+          stroke-width="1.6"
+          stroke-linejoin="round"
+          stroke-linecap="round"
+          points="0,38 12,34 24,32 36,33 48,24 60,28 72,20 84,26 96,18 108,22 120,16 132,24 144,20 156,32 168,28 180,36 192,30 204,38 216,32 228,28 240,30 252,24 264,26 276,20 288,22 300,16 312,20 324,14 336,18 348,12 360,16 372,10 384,14 400,12"
+        />
+        <circle cx="400" cy="12" r="2.4" fill="#111" />
+      </svg>
+    </div>
+    <div class="compact">
+      <span class="compact-pair">ETH/USDT</span>
+      <span class="compact-price">1,889</span>
+      <span class="compact-change">+0.83%</span>
+    </div>
+    <div class="footer">
+      <span class="wordmark">TICKBYTE</span>
+      <span class="quit">[ QUIT ]</span>
+    </div>
+  </aside>
 </body>
 </html>
