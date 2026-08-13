@@ -134,6 +134,9 @@ enum NothingTheme {
         static let buttonTarget: CGFloat = 44
         /// Transitions are percussive — a short ease-out, never a spring.
         static let transition: TimeInterval = 0.15
+        /// Last-print tape must stay on screen long enough to be seen. The 150ms
+        /// micro token often restores ink before AppKit has painted the colour.
+        static let printFlash: TimeInterval = 0.45
     }
 }
 

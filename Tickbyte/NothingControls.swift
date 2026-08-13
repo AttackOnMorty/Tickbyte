@@ -40,6 +40,14 @@ final class NothingLabel: NSTextField {
         didSet { if !text.isEmpty { applyAttributes() } }
     }
 
+    /// Set ink through the cell *and* the attributed string. Assigning `textColor`
+    /// alone can lose the colour on the next layout pass.
+    func apply(color: NSColor) {
+        super.textColor = color
+        applyAttributes()
+        needsDisplay = true
+    }
+
     override var intrinsicContentSize: NSSize {
         let size = attributedStringValue.size()
         return NSSize(width: ceil(size.width), height: ceil(size.height))

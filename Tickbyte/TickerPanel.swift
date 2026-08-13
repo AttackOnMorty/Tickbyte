@@ -139,7 +139,7 @@ final class HeroCoinView: NSView {
         } else if priceLabel.text != coin.price {
             flashGeneration += 1
             priceLabel.text = coin.price
-            priceLabel.textColor = NothingTheme.Palette.textDisplay
+            priceLabel.apply(color: NothingTheme.Palette.textDisplay)
         }
         dayChartView.state = coin.dayChart
     }
@@ -156,16 +156,17 @@ final class HeroCoinView: NSView {
         logger.info("hero \(previous, privacy: .public) -> \(newPrice, privacy: .public) \(String(describing: direction), privacy: .public) reduceMotion=\(reduceMotion)")
         guard !previous.isEmpty, direction != .flat, !reduceMotion else {
             flashGeneration += 1
-            priceLabel.textColor = NothingTheme.Palette.textDisplay
+            priceLabel.apply(color: NothingTheme.Palette.textDisplay)
             return
         }
 
-        priceLabel.textColor = PanelText.changeColorRole(direction).color
+        priceLabel.apply(color: PanelText.changeColorRole(direction).color)
+        priceLabel.displayIfNeeded()
         flashGeneration += 1
         let generation = flashGeneration
-        DispatchQueue.main.asyncAfter(deadline: .now() + NothingTheme.Metric.transition) { [weak self] in
+        DispatchQueue.main.asyncAfter(deadline: .now() + NothingTheme.Metric.printFlash) { [weak self] in
             guard let self, self.flashGeneration == generation else { return }
-            self.priceLabel.textColor = NothingTheme.Palette.textDisplay
+            self.priceLabel.apply(color: NothingTheme.Palette.textDisplay)
         }
     }
 }
