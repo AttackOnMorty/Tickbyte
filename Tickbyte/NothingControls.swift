@@ -2,8 +2,8 @@
 //  NothingControls.swift
 //  Tickbyte
 //
-//  The small AppKit pieces the panel is built from: a tracked label, a hairline, and a
-//  mechanical toggle. Kept apart from the panel so each one is a single readable thing.
+//  The small AppKit pieces the panel is built from: a tracked label, a hairline, and
+//  the UTC-day sparkline. Kept apart from the panel so each one is a single readable thing.
 //
 
 import AppKit
@@ -91,6 +91,7 @@ final class HairlineView: NSView {
 /// A current UTC-day sparkline. The line is deliberately neutral: direction is already
 /// encoded by the adjacent percentage, so repeating red/green here would create a second
 /// accent event. No fill, axes, grid or enclosing card compete with the data itself.
+/// The last print is a single filled dot — the one mechanical mark on the line.
 final class DayChartView: NSView {
     private let plot: DaySparklinePlot
 
@@ -154,8 +155,9 @@ final class DaySparklinePlot: NSView {
         path.lineJoinStyle = .round
         path.lineCapStyle = .round
 
-        let plotBounds = bounds.insetBy(dx: 0.75, dy: 2)
+        let plotBounds = bounds.insetBy(dx: 2, dy: 2)
         let range = high - low
+        var lastPoint = NSPoint.zero
         for (index, value) in points.enumerated() {
             let x = plotBounds.minX
                 + CGFloat(index) / CGFloat(points.count - 1) * plotBounds.width
@@ -163,11 +165,21 @@ final class DaySparklinePlot: NSView {
             let y = plotBounds.maxY - CGFloat(normalizedY) * plotBounds.height
             let point = NSPoint(x: x, y: y)
             index == 0 ? path.move(to: point) : path.line(to: point)
+            lastPoint = point
         }
 
         effectiveAppearance.performAsCurrentDrawingAppearance {
             NothingTheme.Palette.textDisplay.setStroke()
             path.stroke()
+            let radius: CGFloat = 2
+            let dot = NSBezierPath(ovalIn: NSRect(
+                x: lastPoint.x - radius,
+                y: lastPoint.y - radius,
+                width: radius * 2,
+                height: radius * 2
+            ))
+            NothingTheme.Palette.textDisplay.setFill()
+            dot.fill()
         }
     }
 

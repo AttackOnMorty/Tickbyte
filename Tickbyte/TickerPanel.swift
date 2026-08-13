@@ -11,6 +11,7 @@
 //
 
 import AppKit
+import QuartzCore
 
 /// Everything the panel needs to draw itself, already resolved by the caller.
 struct PanelSnapshot {
@@ -28,7 +29,8 @@ struct PanelSnapshot {
         let dayChart: DayChart
     }
 
-    /// All supported coins are equal peers in one primary market board.
+    /// The focused coin sits in the hero slot; the rest become compact rows.
+    let focusedSymbol: String
     let feedStatus: PanelText.Status
     let coins: [Coin]
 }
@@ -36,19 +38,19 @@ struct PanelSnapshot {
 extension PanelText.Status {
     var color: NSColor {
         switch self {
-        case .live: return NothingTheme.Palette.success
+        case .live: return NothingTheme.Palette.successOnPaper
         case .sync: return NothingTheme.Palette.warning
         case .lost: return NothingTheme.Palette.accent
         }
     }
 }
 
-extension PanelText.Direction {
+extension PanelText.ColorRole {
     var color: NSColor {
         switch self {
-        case .up: return NothingTheme.Palette.accent
-        case .down: return NothingTheme.Palette.success
-        case .flat: return NothingTheme.Palette.textDisabled
+        case .success: return NothingTheme.Palette.successOnPaper
+        case .accent: return NothingTheme.Palette.accent
+        case .disabled: return NothingTheme.Palette.textDisabled
         }
     }
 }
@@ -56,56 +58,68 @@ extension PanelText.Direction {
 @MainActor
 protocol TickerPanelViewDelegate: AnyObject {
     func panelViewDidRequestQuit(_ view: TickerPanelView)
+    func panelView(_ view: TickerPanelView, didFocus symbol: String)
 }
 
-// MARK: - Coin section
+// MARK: - Hero
 
-/// One equal peer in the market board. Every coin receives the same type, spacing,
-/// status treatment and menu-bar control; only the data changes.
-final class CoinSectionView: NSView {
+/// The one primary on the board: Doto price and a UTC-day sparkline.
+/// Quote and window stay off the number — `BTC/USDT` already names the pair.
+final class HeroCoinView: NSView {
     private let pairLabel: NothingLabel
-    private let priceLabel: NothingLabel
     private let changeLabel: NothingLabel
+    private let priceLabel: NothingLabel
     private let dayChartView: DayChartView
 
-    init(symbol: String) {
+    init() {
         pairLabel = NothingLabel(
             font: NothingTheme.data(size: NothingTheme.TypeSize.label),
             color: NothingTheme.Palette.textSecondary,
             tracking: NothingTheme.labelTracking
         )
-        priceLabel = NothingLabel(
-            font: NothingTheme.display(size: NothingTheme.TypeSize.hero),
-            color: NothingTheme.Palette.textDisplay
-        )
         changeLabel = NothingLabel(
             font: NothingTheme.data(size: NothingTheme.TypeSize.value),
             color: NothingTheme.Palette.textDisabled,
-            alignment: .left
+            alignment: .right
+        )
+        priceLabel = NothingLabel(
+            font: NothingTheme.display(size: NothingTheme.TypeSize.hero),
+            color: NothingTheme.Palette.textDisplay,
+            tracking: NothingTheme.displayTracking
         )
         dayChartView = DayChartView()
         super.init(frame: .zero)
         translatesAutoresizingMaskIntoConstraints = false
 
         changeLabel.setContentCompressionResistancePriority(.required, for: .horizontal)
-        for view in [pairLabel, priceLabel, changeLabel, dayChartView] {
+        priceLabel.setContentCompressionResistancePriority(.defaultLow, for: .horizontal)
+        for view in [pairLabel, changeLabel, priceLabel, dayChartView] {
             addSubview(view)
         }
         NSLayoutConstraint.activate([
             pairLabel.leadingAnchor.constraint(equalTo: leadingAnchor),
             pairLabel.topAnchor.constraint(equalTo: topAnchor),
 
-            priceLabel.leadingAnchor.constraint(equalTo: leadingAnchor),
-            priceLabel.topAnchor.constraint(equalTo: pairLabel.bottomAnchor, constant: NothingTheme.Metric.md),
-            priceLabel.trailingAnchor.constraint(lessThanOrEqualTo: trailingAnchor),
+            changeLabel.trailingAnchor.constraint(equalTo: trailingAnchor),
+            changeLabel.firstBaselineAnchor.constraint(equalTo: pairLabel.firstBaselineAnchor),
+            changeLabel.leadingAnchor.constraint(
+                greaterThanOrEqualTo: pairLabel.trailingAnchor,
+                constant: NothingTheme.Metric.sm
+            ),
 
-            changeLabel.leadingAnchor.constraint(equalTo: leadingAnchor),
-            changeLabel.topAnchor.constraint(equalTo: priceLabel.bottomAnchor, constant: NothingTheme.Metric.xs),
-            changeLabel.trailingAnchor.constraint(lessThanOrEqualTo: trailingAnchor),
+            priceLabel.leadingAnchor.constraint(equalTo: leadingAnchor),
+            priceLabel.topAnchor.constraint(
+                equalTo: pairLabel.bottomAnchor,
+                constant: NothingTheme.Metric.sm
+            ),
+            priceLabel.trailingAnchor.constraint(lessThanOrEqualTo: trailingAnchor),
 
             dayChartView.leadingAnchor.constraint(equalTo: leadingAnchor),
             dayChartView.trailingAnchor.constraint(equalTo: trailingAnchor),
-            dayChartView.topAnchor.constraint(equalTo: changeLabel.bottomAnchor, constant: NothingTheme.Metric.sm),
+            dayChartView.topAnchor.constraint(
+                equalTo: priceLabel.bottomAnchor,
+                constant: NothingTheme.Metric.md
+            ),
             dayChartView.bottomAnchor.constraint(equalTo: bottomAnchor),
         ])
     }
@@ -115,10 +129,125 @@ final class CoinSectionView: NSView {
 
     func update(with coin: PanelSnapshot.Coin) {
         pairLabel.text = coin.pair
+        changeLabel.text = coin.change.text
+        changeLabel.textColor = PanelText.changeColorRole(coin.change.direction).color
+        flashPrice(ifChangedTo: coin.price)
+        dayChartView.state = coin.dayChart
+    }
+
+    /// A short ease-out fade-in when the print moves — click, not swoosh.
+    private func flashPrice(ifChangedTo newPrice: String) {
+        let previous = priceLabel.text
+        priceLabel.text = newPrice
+        guard !previous.isEmpty, previous != newPrice else { return }
+        priceLabel.alphaValue = 0.35
+        NSAnimationContext.runAnimationGroup { context in
+            context.duration = NothingTheme.Metric.transition
+            context.timingFunction = CAMediaTimingFunction(controlPoints: 0.25, 0.1, 0.25, 1)
+            priceLabel.animator().alphaValue = 1
+        }
+    }
+}
+
+// MARK: - Compact row
+
+/// Secondary coin: one stat row. Click promotes it into the hero slot.
+final class CompactCoinView: NSControl {
+    private let pairLabel: NothingLabel
+    private let priceLabel: NothingLabel
+    private let changeLabel: NothingLabel
+
+    private(set) var symbol: String = ""
+
+    init() {
+        pairLabel = NothingLabel(
+            font: NothingTheme.data(size: NothingTheme.TypeSize.label),
+            color: NothingTheme.Palette.textSecondary,
+            tracking: NothingTheme.labelTracking
+        )
+        priceLabel = NothingLabel(
+            font: NothingTheme.data(size: NothingTheme.TypeSize.value),
+            color: NothingTheme.Palette.textDisplay
+        )
+        changeLabel = NothingLabel(
+            font: NothingTheme.data(size: NothingTheme.TypeSize.label),
+            color: NothingTheme.Palette.textDisabled,
+            alignment: .right
+        )
+        super.init(frame: .zero)
+        translatesAutoresizingMaskIntoConstraints = false
+        focusRingType = .exterior
+        setAccessibilityRole(.button)
+
+        changeLabel.setContentCompressionResistancePriority(.required, for: .horizontal)
+        priceLabel.setContentCompressionResistancePriority(.required, for: .horizontal)
+        pairLabel.setContentCompressionResistancePriority(.defaultLow, for: .horizontal)
+        for view in [pairLabel, priceLabel, changeLabel] {
+            addSubview(view)
+        }
+        NSLayoutConstraint.activate([
+            heightAnchor.constraint(greaterThanOrEqualToConstant: NothingTheme.Metric.buttonTarget),
+
+            pairLabel.leadingAnchor.constraint(equalTo: leadingAnchor),
+            pairLabel.centerYAnchor.constraint(equalTo: centerYAnchor),
+
+            changeLabel.trailingAnchor.constraint(equalTo: trailingAnchor),
+            changeLabel.centerYAnchor.constraint(equalTo: centerYAnchor),
+
+            priceLabel.trailingAnchor.constraint(
+                equalTo: changeLabel.leadingAnchor,
+                constant: -NothingTheme.Metric.md
+            ),
+            priceLabel.centerYAnchor.constraint(equalTo: centerYAnchor),
+            pairLabel.trailingAnchor.constraint(
+                lessThanOrEqualTo: priceLabel.leadingAnchor,
+                constant: -NothingTheme.Metric.sm
+            ),
+        ])
+        addTrackingArea(NSTrackingArea(
+            rect: .zero,
+            options: [.mouseEnteredAndExited, .activeAlways, .inVisibleRect],
+            owner: self
+        ))
+    }
+
+    @available(*, unavailable)
+    required init?(coder: NSCoder) { fatalError("init(coder:) has not been implemented") }
+
+    override var acceptsFirstResponder: Bool { true }
+    override var focusRingMaskBounds: NSRect { bounds.insetBy(dx: -2, dy: -2) }
+
+    override func drawFocusRingMask() {
+        NSBezierPath(roundedRect: focusRingMaskBounds, xRadius: 4, yRadius: 4).fill()
+    }
+
+    func update(with coin: PanelSnapshot.Coin) {
+        symbol = coin.symbol
+        pairLabel.text = coin.pair
         priceLabel.text = coin.price
         changeLabel.text = coin.change.text
-        changeLabel.textColor = coin.change.direction.color
-        dayChartView.state = coin.dayChart
+        changeLabel.textColor = PanelText.changeColorRole(coin.change.direction).color
+        setAccessibilityLabel("Show \(coin.pair)")
+    }
+
+    override func mouseDown(with event: NSEvent) {
+        sendAction(action, to: target)
+    }
+
+    override func keyDown(with event: NSEvent) {
+        if event.keyCode == 36 || event.charactersIgnoringModifiers == " " {
+            sendAction(action, to: target)
+        } else {
+            super.keyDown(with: event)
+        }
+    }
+
+    override func mouseEntered(with event: NSEvent) {
+        pairLabel.textColor = NothingTheme.Palette.textPrimary
+    }
+
+    override func mouseExited(with event: NSEvent) {
+        pairLabel.textColor = NothingTheme.Palette.textSecondary
     }
 }
 
@@ -129,15 +258,20 @@ final class TickerPanelView: NSView {
 
     weak var delegate: TickerPanelViewDelegate?
 
+    private let wordmarkLabel = NothingLabel(
+        font: NothingTheme.body(size: NothingTheme.TypeSize.label),
+        color: NothingTheme.Palette.textDisabled
+    )
     private let statusLabel = NothingLabel(
         font: NothingTheme.data(size: NothingTheme.TypeSize.label),
         color: NothingTheme.Palette.textDisabled,
         tracking: NothingTheme.labelTracking
     )
-    private var coinSections: [CoinSectionView] = []
+    private let heroSection = HeroCoinView()
+    private var compactRows: [CompactCoinView] = []
 
-    /// - Parameter symbols: every supported coin, in a fixed order. The stat rows are
-    ///   sized from this once — the panel is never rebuilt, only refreshed.
+    /// - Parameter symbols: every supported coin, in a fixed order. One hero and
+    ///   `count - 1` compact rows are built once — the panel is never rebuilt.
     init(symbols: [String]) {
         super.init(frame: .zero)
         wantsLayer = true
@@ -161,7 +295,7 @@ final class TickerPanelView: NSView {
 
     private func applyChrome() {
         effectiveAppearance.performAsCurrentDrawingAppearance {
-            layer?.backgroundColor = NothingTheme.Palette.background.cgColor
+            layer?.backgroundColor = NothingTheme.Palette.panel.cgColor
             layer?.borderColor = NothingTheme.Palette.borderVisible.cgColor
         }
     }
@@ -183,15 +317,21 @@ final class TickerPanelView: NSView {
             stack.bottomAnchor.constraint(equalTo: bottomAnchor, constant: -Metric.padding),
         ])
 
-        coinSections = symbols.enumerated().map { index, symbol in
-            let section = CoinSectionView(symbol: symbol)
-            addFullWidth(section, to: stack)
-            // Identical peers are separated by a wide rhythm, never a decorative rule.
-            stack.setCustomSpacing(
-                index == symbols.indices.last ? Metric.lg : Metric.sectionGap,
-                after: section
-            )
-            return section
+        addFullWidth(heroSection, to: stack)
+        stack.setCustomSpacing(Metric.sectionGap, after: heroSection)
+
+        compactRows = (0..<max(symbols.count - 1, 0)).map { _ in
+            let row = CompactCoinView()
+            row.target = self
+            row.action = #selector(compactClicked(_:))
+            addFullWidth(row, to: stack)
+            stack.setCustomSpacing(Metric.md, after: row)
+            return row
+        }
+        if let lastRow = compactRows.last {
+            stack.setCustomSpacing(Metric.xl, after: lastRow)
+        } else {
+            stack.setCustomSpacing(Metric.xl, after: heroSection)
         }
 
         let quit = NothingTextButton(
@@ -212,14 +352,21 @@ final class TickerPanelView: NSView {
         view.widthAnchor.constraint(equalTo: stack.widthAnchor).isActive = true
     }
 
-    /// Exceptional connection state and the app action share one quiet instrument footer.
+    /// Wordmark, exceptional feed state, and the app action share one quiet footer.
     private func makeFooterRow(quit: NSView) -> NSView {
         let container = NSView()
         container.translatesAutoresizingMaskIntoConstraints = false
+        wordmarkLabel.text = PanelText.wordmark
+        container.addSubview(wordmarkLabel)
         container.addSubview(statusLabel)
         container.addSubview(quit)
         NSLayoutConstraint.activate([
-            statusLabel.leadingAnchor.constraint(equalTo: container.leadingAnchor),
+            wordmarkLabel.leadingAnchor.constraint(equalTo: container.leadingAnchor),
+            wordmarkLabel.centerYAnchor.constraint(equalTo: container.centerYAnchor),
+            statusLabel.leadingAnchor.constraint(
+                equalTo: wordmarkLabel.trailingAnchor,
+                constant: Metric.md
+            ),
             statusLabel.centerYAnchor.constraint(equalTo: container.centerYAnchor),
             quit.trailingAnchor.constraint(equalTo: container.trailingAnchor),
             quit.leadingAnchor.constraint(
@@ -241,8 +388,26 @@ final class TickerPanelView: NSView {
         if statusText != nil {
             statusLabel.textColor = snapshot.feedStatus.color
         }
-        for (section, coin) in zip(coinSections, snapshot.coins) {
-            section.update(with: coin)
+
+        let symbols = snapshot.coins.map(\.symbol)
+        let board = PanelBoard.arrange(focused: snapshot.focusedSymbol, symbols: symbols)
+        let bySymbol = Dictionary(uniqueKeysWithValues: snapshot.coins.map { ($0.symbol, $0) })
+
+        if let heroSymbol = board.hero, let coin = bySymbol[heroSymbol] {
+            heroSection.update(with: coin)
+            heroSection.isHidden = false
+        } else {
+            heroSection.isHidden = true
+        }
+
+        for (row, symbol) in zip(compactRows, board.compact) {
+            if let coin = bySymbol[symbol] {
+                row.update(with: coin)
+                row.isHidden = false
+            }
+        }
+        for row in compactRows.dropFirst(board.compact.count) {
+            row.isHidden = true
         }
     }
 
@@ -250,6 +415,11 @@ final class TickerPanelView: NSView {
 
     @objc private func quitClicked() {
         delegate?.panelViewDidRequestQuit(self)
+    }
+
+    @objc private func compactClicked(_ sender: CompactCoinView) {
+        guard !sender.symbol.isEmpty else { return }
+        delegate?.panelView(self, didFocus: sender.symbol)
     }
 }
 

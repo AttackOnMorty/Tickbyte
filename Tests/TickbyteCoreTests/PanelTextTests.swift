@@ -50,8 +50,46 @@ final class PanelTextTests: XCTestCase {
         XCTAssertEqual(PanelText.change(fromRaw: "-1.2").direction, .down)
     }
 
-    func testZeroChangeCountsAsUp() {
-        XCTAssertEqual(PanelText.change(fromRaw: "0").direction, .up)
+    func testZeroChangeCountsAsFlat() {
+        XCTAssertEqual(PanelText.change(fromRaw: "0").direction, .flat)
+        XCTAssertEqual(PanelText.change(fromRaw: "0").text, "+0.00%")
+    }
+
+    func testQuoteAssetIsTheUSDTSuffix() {
+        XCTAssertEqual(PanelText.quoteAsset(for: "btcusdt"), "USDT")
+        XCTAssertEqual(PanelText.quoteAsset(for: "ethusdt"), "USDT")
+    }
+
+    func testQuoteAssetIsEmptyWhenThePairHasNoUSDTQuote() {
+        XCTAssertEqual(PanelText.quoteAsset(for: "btc"), "")
+    }
+
+    func testUpIsAccentAndDownIsSuccess() {
+        XCTAssertEqual(PanelText.changeColorRole(.up), .accent)
+        XCTAssertEqual(PanelText.changeColorRole(.down), .success)
+        XCTAssertEqual(PanelText.changeColorRole(.flat), .disabled)
+    }
+
+    func testBoardPromotesTheFocusedCoinAndKeepsTheRestCompact() {
+        let board = PanelBoard.arrange(focused: "ethusdt", symbols: ["btcusdt", "ethusdt"])
+        XCTAssertEqual(board.hero, "ethusdt")
+        XCTAssertEqual(board.compact, ["btcusdt"])
+    }
+
+    func testBoardFallsBackToTheFirstSymbolWhenFocusIsMissing() {
+        let unknown = PanelBoard.arrange(focused: "dogeusdt", symbols: ["btcusdt", "ethusdt"])
+        XCTAssertEqual(unknown.hero, "btcusdt")
+        XCTAssertEqual(unknown.compact, ["ethusdt"])
+
+        let empty = PanelBoard.arrange(focused: nil, symbols: ["btcusdt", "ethusdt"])
+        XCTAssertEqual(empty.hero, "btcusdt")
+        XCTAssertEqual(empty.compact, ["ethusdt"])
+    }
+
+    func testBoardIsEmptyWhenThereAreNoSymbols() {
+        let board = PanelBoard.arrange(focused: "btcusdt", symbols: [])
+        XCTAssertNil(board.hero)
+        XCTAssertTrue(board.compact.isEmpty)
     }
 
     func testUnparseableChangeFallsBackToThePlaceholder() {

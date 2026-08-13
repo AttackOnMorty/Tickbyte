@@ -24,7 +24,7 @@ Unlike polling-based price trackers, Tickbyte updates as new trade data arrives.
 FEATURES
 • Real-time BTC and ETH prices
 • Push-based updates through persistent WebSocket connections
-• UTC trading-day price movement and charts
+• UTC trading-day movement and sparkline on the focused coin
 • Compact Mac menu bar display
 • No account, ads, analytics, or cloud storage
 
@@ -53,6 +53,6 @@ Tickbyte is a menu bar-only macOS app, so it does not open a Dock window.
 
 1. Launch Tickbyte.
 2. Click the Tickbyte icon in the macOS menu bar.
-3. The panel displays BTC/USDT and ETH/USDT prices, UTC trading-day movement, and charts.
+3. The panel displays a focused coin (large price, UTC-day sparkline) and the other coin as a compact row. Click the compact row to promote it.
 
 Live prices are received from Binance public WebSocket trade streams. No account or login is required.

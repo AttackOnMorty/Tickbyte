@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## What this is
 
-A lightweight macOS **menu bar** app showing real-time crypto prices via the Binance WebSocket + REST API. No main window — it lives entirely in the status bar (`NSStatusItem`) with a custom dropdown panel. Shows BTC and ETH; each can be switched on/off in the panel to show or hide it in the menu bar. There is no search — the coin set is fixed.
+A lightweight macOS **menu bar** app showing real-time crypto prices via the Binance WebSocket + REST API. No main window — it lives entirely in the status bar (`NSStatusItem`) with a custom dropdown panel. Shows BTC and ETH; one coin occupies the panel's hero slot and the other sits in a compact row you click to promote. There is no search — the coin set is fixed.
 
 The interface follows the **Nothing** design system: monochrome, typographically driven, colour only where it encodes data status. See `## Design system` below before changing anything visual.
 
@@ -40,7 +40,7 @@ Both `AppDelegate` and `WebSocketManager` are `@MainActor`. **All mutable state 
 
 ### Data flow
 
-1. At launch `WebSocketManager` REST-fetches prices for the **selected** symbols only, then opens a `@trade` WebSocket per selected symbol. Prices for all supported coins are refreshed (debounced) when the panel opens, so a hidden coin's row stays current even though it has no live socket.
+1. At launch `WebSocketManager` REST-fetches prices for the **selected** symbols only, then opens a `@trade` WebSocket per selected symbol. Prices for all supported coins are refreshed (debounced) when the panel opens.
 2. Live trade messages update `prices`; `.priceUpdated` is posted **only while the panel is visible** (`isPanelVisible`) — when closed, the 1 Hz status-bar timer reads state directly, so per-trade notifications would be wasted work.
 3. Status bar title: rebuilt every 1s by a timer, but `button.attributedTitle` is only assigned when the title actually changed. `StatusBarText.Title` is `Equatable` so a *colour-only* change (an item going stale at the same price) still counts as a change.
 4. Panel: every view is built once in `TickerPanelView.init` for the fixed symbol list and refreshed in place through `update(with:)` — never rebuilt. `AppDelegate` resolves a `PanelSnapshot` and hands it over; the view holds no market state, exactly as the menu it replaced did not.
@@ -58,7 +58,7 @@ Side-effect-free decision/formatting code is factored out of the AppKit classes 
 - `WebSocketPlan` — which sockets to open/close/reconnect (pure set math over selected vs. active symbols).
 - `BackoffPolicy` — reconnect delay calculation.
 - `PriceFormatter` — raw feed strings → display text (magnitude-dependent precision; reused immutable `NumberFormatter`s; unparseable input returns a placeholder rather than echoing untrusted feed strings).
-- `DisplayText` (`PanelText`, `StatusBarText`) — Foundation-only builders for the panel and status-bar strings. `StatusBarText.make` also returns the exact ranges to colour, computed by construction rather than by searching the finished string.
+- `DisplayText` (`PanelText`, `PanelBoard`, `StatusBarText`) — Foundation-only builders for the panel and status-bar strings. `PanelBoard` picks the hero vs. compact coins; `StatusBarText.make` returns the exact ranges to colour, computed by construction rather than by searching the finished string.
 - `SymbolCatalog` — the fixed supported-symbol list, whitelist validation (`validSymbols`, the URL-injection guard) and display-code derivation (`displayCode`, e.g. `btcusdt` → `BTC`).
 
 When adding behavior to networking or rendering, prefer extending these pure types and testing them, rather than putting logic inside the `@MainActor` classes.
@@ -69,8 +69,11 @@ The Nothing system in one paragraph: three layers of importance per screen and n
 
 - **Tokens live in `NothingTheme`** — colour, type, spacing, metrics. No hex literal or point size belongs in view code. Dark and light are equal: every surface/text colour is a dynamic `NSColor`, so a view works in both without branching.
 - **`cgColor` freezes the appearance current at resolution time.** Any layer-backed view reading a dynamic colour must do it inside `effectiveAppearance.performAsCurrentDrawingAppearance { }` and re-resolve on `viewDidChangeEffectiveAppearance()`, or it stays stuck in whichever mode drew it first.
-- **The panel's one pattern-break is the hero number** in Doto, the dot-matrix face. Nothing else on the panel may compete with it; if something needs more emphasis, take it from the hero or move it.
+- **The panel's one pattern-break is the focused hero price** in Doto. The compact row and the menu bar stay in Space Mono. If something needs more emphasis, take it from the hero or move it.
+- **Three layers, not two equal instruments.** Hero price is primary; the compact row is secondary; wordmark and `[ QUIT ]` are tertiary. Only the hero draws a sparkline. The pair label already names the quote — do not repeat `USDT` or a period (`UTC` / `24H`) beside the number.
 - **Three type sizes on the panel** (`TypeSize.hero` / `.value` / `.label`) and one on the menu bar. A fourth size is almost always a spacing problem — add distance instead.
+- **Light panel is a white card** (`Palette.panel`) on paper; dark panel is OLED black. Radius is the dropdown token (8).
+- **Change colour follows the tape:** up is accent red, down is success green, on both rows. A `+0.00%` print stays `--text-disabled`. `[LOST]` still uses accent as the connection interrupt.
 - **Fonts are bundled, not assumed.** `Tickbyte/Fonts/*.ttf` (Doto, Space Grotesk, Space Mono — all OFL) are registered into the *process* on first font lookup by `NothingTheme.registration`; the app never installs fonts system-wide. Doto and Space Grotesk are variable faces whose named instances are not addressable by PostScript name, so `NothingTheme.resolve` goes through a family + weight `NSFontDescriptor` and verifies the family actually matched before returning — a missing face falls back to a system font rather than silently rendering the wrong one.
 - **Adding a font file?** Drop it in `Tickbyte/Fonts/`; the Xcode target uses a filesystem-synchronized group, so it is bundled automatically.
 

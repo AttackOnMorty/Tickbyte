@@ -19,6 +19,8 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     private var statusBarTimer: Timer?
     private var lastStatusTitle: StatusBarText.Title?
     private var lastPanelFetch: Date?
+    /// Which coin occupies the panel's hero slot. Session-only — not persisted.
+    private var focusedSymbol: String = SymbolCatalog.supported[0]
 
     override init() {
         super.init()
@@ -193,6 +195,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     private func makeSnapshot() -> PanelSnapshot {
         let symbols = webSocketManager.availableSymbols
         return PanelSnapshot(
+            focusedSymbol: focusedSymbol,
             feedStatus: PanelText.feedStatus(
                 states: symbols.map { webSocketManager.connectionStates[$0] }
             ),
@@ -240,5 +243,11 @@ extension AppDelegate: TickerPanelViewDelegate {
         statusBarTimer?.invalidate()
         webSocketManager.disconnectWebSockets()
         NSApplication.shared.terminate(nil)
+    }
+
+    func panelView(_ view: TickerPanelView, didFocus symbol: String) {
+        guard SymbolCatalog.supported.contains(symbol), symbol != focusedSymbol else { return }
+        focusedSymbol = symbol
+        refreshPanel()
     }
 }

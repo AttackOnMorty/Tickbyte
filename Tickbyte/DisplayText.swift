@@ -12,11 +12,19 @@ import Foundation
 /// wording rules (instrument-panel labels, signed percentages, placeholders) can be
 /// tested without a live socket.
 enum PanelText {
+    static let wordmark = "TICKBYTE"
+
     /// "btcusdt" -> "BTC/USDT". The quote asset is spelled out here — the panel has the
     /// room the menu bar does not.
     static func pair(for symbol: String) -> String {
         let code = SymbolCatalog.displayCode(for: symbol)
-        return symbol.hasSuffix("usdt") ? "\(code)/USDT" : code
+        let quote = quoteAsset(for: symbol)
+        return quote.isEmpty ? code : "\(code)/\(quote)"
+    }
+
+    /// Adjacent unit for the hero price. Empty when the pair has no known quote.
+    static func quoteAsset(for symbol: String) -> String {
+        symbol.hasSuffix("usdt") ? "USDT" : ""
     }
 
     /// Four-letter instrument states, all the same width so the header never reflows.
@@ -53,18 +61,51 @@ enum PanelText {
         case up, down, flat
     }
 
+    /// Status colour roles, kept as names so the AppKit layer can map them to tokens
+    /// without the colour decision living in a view.
+    enum ColorRole {
+        case success, accent, disabled
+    }
+
     struct Change {
         let text: String
         let direction: Direction
     }
 
     /// The sign and the colour carry the direction — no arrow glyph, which would have to
-    /// be a filled triangle.
+    /// be a filled triangle. Zero is flat, not up: a print of `+0.00%` is not a move.
     static func change(fromRaw raw: String) -> Change {
         guard let value = PriceFormatter.percentValue(raw) else {
             return Change(text: PriceFormatter.placeholder, direction: .flat)
         }
-        return Change(text: PriceFormatter.percent(raw), direction: value >= 0 ? .up : .down)
+        let direction: Direction = value > 0 ? .up : value < 0 ? .down : .flat
+        return Change(text: PriceFormatter.percent(raw), direction: direction)
+    }
+
+    /// East-Asian tape: red marks an advance, green a decline. Zero stays
+    /// disabled — it is not a move.
+    static func changeColorRole(_ direction: Direction) -> ColorRole {
+        switch direction {
+        case .up: return .accent
+        case .down: return .success
+        case .flat: return .disabled
+        }
+    }
+}
+
+/// Which coin sits in the hero slot. Pure set math so the panel can stay a dumb view.
+enum PanelBoard {
+    struct Arrangement: Equatable {
+        let hero: String?
+        let compact: [String]
+    }
+
+    static func arrange(focused: String?, symbols: [String]) -> Arrangement {
+        guard let first = symbols.first else {
+            return Arrangement(hero: nil, compact: [])
+        }
+        let hero = focused.flatMap { symbols.contains($0) ? $0 : nil } ?? first
+        return Arrangement(hero: hero, compact: symbols.filter { $0 != hero })
     }
 }
 

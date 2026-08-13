@@ -18,6 +18,8 @@ enum NothingTheme {
     /// text/surface token is dynamic so a single view works in both.
     enum Palette {
         static let background = dynamic(dark: 0x000000, light: 0xF5F5F5)
+        /// Dropdown fill: OLED black in the dark, white card on paper in the light.
+        static let panel = dynamic(dark: 0x000000, light: 0xFFFFFF)
         static let border = dynamic(dark: 0x222222, light: 0xE8E8E8)
         static let borderVisible = dynamic(dark: 0x333333, light: 0xCCCCCC)
         static let textDisabled = dynamic(dark: 0x666666, light: 0x999999)
@@ -28,9 +30,10 @@ enum NothingTheme {
         /// Status colours are identical in both modes — they encode data, not chrome.
         /// `accent` is the interrupt: nothing else on screen may use it.
         static let accent = NSColor(rgb: 0xD71921)
-        // The original green remains legible on OLED black; light mode needs a darker
-        // value to keep 16pt market movement above normal-text contrast requirements.
-        static let success = dynamic(dark: 0x4A9E5C, light: 0x2E7D42)
+        static let success = NSColor(rgb: 0x4A9E5C)
+        /// Paper-side fork of `success`: 16pt green on `#FFFFFF` needs a darker ink
+        /// to stay above normal-text contrast. Dark mode keeps the canonical token.
+        static let successOnPaper = dynamic(dark: 0x4A9E5C, light: 0x2E7D42)
         static let warning = NSColor(rgb: 0xD4A843)
 
         private static func dynamic(dark: Int, light: Int) -> NSColor {
@@ -43,9 +46,9 @@ enum NothingTheme {
 
     // MARK: - Type
 
-    /// Bundled families. Doto is the dot-matrix display face (hero numbers only),
-    /// Space Mono carries all data and ALL-CAPS labels, Space Grotesk the little prose
-    /// there is. Both variable faces resolve through a family + weight descriptor
+    /// Bundled families. Doto is the one pattern-break — the focused hero price.
+    /// Space Mono carries every other number and ALL-CAPS label. Space Grotesk is
+    /// the quiet wordmark. Both variable faces resolve through a descriptor
     /// because their named instances ("SpaceGrotesk-Light_Medium") are not addressable
     /// by PostScript name.
     private enum Family {
@@ -54,7 +57,7 @@ enum NothingTheme {
         static let data = "Space Mono"
     }
 
-    /// Exactly three token sizes on the panel — display-lg, body, label — and the
+    /// Exactly three token sizes on the panel — hero, body, label — and the
     /// platform-owned menu-bar size.
     /// Anything that wants a fourth is a spacing problem, not a type problem.
     enum TypeSize {
@@ -65,8 +68,9 @@ enum NothingTheme {
     }
 
     /// ALL-CAPS labels need the wide 0.08em tracking that makes them read as instrument
-    /// legends rather than shouting.
+    /// legends rather than shouting. Doto at display size tightens the opposite way.
     static let labelTracking: CGFloat = 0.08
+    static let displayTracking: CGFloat = -0.02
 
     static func display(size: CGFloat) -> NSFont {
         resolve(Family.display, size: size, weight: .regular)
@@ -121,9 +125,9 @@ enum NothingTheme {
         static let lg: CGFloat = 24
         static let xl: CGFloat = 32
         static let sectionGap: CGFloat = 48
-        static let cornerRadius: CGFloat = 10
+        static let cornerRadius: CGFloat = 8
         static let hairline: CGFloat = 1
-        static let chartHeight: CGFloat = 48
+        static let chartHeight: CGFloat = 32
         /// Gap between the status-bar button and the top of the panel.
         static let panelOffset: CGFloat = 6
         static let buttonTarget: CGFloat = 44

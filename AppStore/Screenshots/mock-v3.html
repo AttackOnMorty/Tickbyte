@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Tickbyte 1440×900</title>
+  <style>
+    @font-face {
+      font-family: "Doto";
+      src: url("../../Tickbyte/Fonts/Doto.ttf") format("truetype");
+      font-weight: 400;
+    }
+    @font-face {
+      font-family: "Space Grotesk";
+      src: url("../../Tickbyte/Fonts/SpaceGrotesk.ttf") format("truetype");
+      font-weight: 400;
+    }
+    @font-face {
+      font-family: "Space Mono";
+      src: url("../../Tickbyte/Fonts/SpaceMono-Regular.ttf") format("truetype");
+      font-weight: 400;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body { width: 1440px; height: 900px; overflow: hidden; }
+    body {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 80px 96px;
+      background: #F5F5F5;
+      color: #000;
+    }
+
+    .brand { width: 720px; }
+    .identity {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      margin-bottom: 48px;
+    }
+    .identity img {
+      width: 56px;
+      height: 56px;
+      border-radius: 12px;
+    }
+    .identity span {
+      font-family: "Space Grotesk", sans-serif;
+      font-size: 18px;
+      letter-spacing: 0.08em;
+      color: #000;
+    }
+    h1 {
+      font-family: "Space Grotesk", sans-serif;
+      font-size: 72px;
+      font-weight: 400;
+      letter-spacing: -0.03em;
+      line-height: 0.95;
+      color: #000;
+    }
+    .lede {
+      margin-top: 32px;
+      font-family: "Space Mono", monospace;
+      font-size: 14px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: #666;
+    }
+
+    .panel {
+      width: 360px;
+      padding: 28px;
+      background: #FFF;
+      border: 1px solid #CCC;
+      border-radius: 8px;
+    }
+    .row {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+    }
+    .pair, .unit, .period, .wordmark, .quit, .compact-pair, .compact-change {
+      font-family: "Space Mono", monospace;
+      font-size: 11px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: #666;
+    }
+    .change-stack {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: 4px;
+    }
+    .change {
+      font-family: "Space Mono", monospace;
+      font-size: 16px;
+      color: #2E7D42;
+    }
+    .period { color: #666; }
+    .price {
+      display: flex;
+      align-items: baseline;
+      gap: 6px;
+      margin-top: 8px;
+    }
+    .price strong {
+      font-family: "Doto", "Space Mono", monospace;
+      font-size: 48px;
+      font-weight: 400;
+      letter-spacing: -0.02em;
+      color: #000;
+      line-height: 1.05;
+    }
+    .chart {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-top: 16px;
+    }
+    .chart svg { flex: 1; height: 32px; display: block; }
+    .compact {
+      display: flex;
+      align-items: center;
+      min-height: 44px;
+      margin-top: 48px;
+    }
+    .compact-pair { flex: 1; }
+    .compact-price {
+      font-family: "Space Mono", monospace;
+      font-size: 16px;
+      color: #000;
+      margin-right: 16px;
+    }
+    .compact-change { color: #2E7D42; letter-spacing: 0; }
+    .footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-top: 32px;
+      min-height: 44px;
+    }
+    .wordmark {
+      font-family: "Space Grotesk", sans-serif;
+      letter-spacing: 0;
+      text-transform: none;
+      color: #999;
+    }
+    .quit { color: #666; }
+  </style>
+</head>
+<body>
+  <section class="brand">
+    <div class="identity">
+      <img src="../../Tickbyte/AppIcon.icon/Assets/AppIcon-1024.png" alt="" />
+      <span>TICKBYTE</span>
+    </div>
+    <h1>Live crypto.<br>Right in your<br>menu bar.</h1>
+    <p class="lede">See BTC + ETH move in real time.</p>
+  </section>
+
+  <aside class="panel">
+    <div class="row">
+      <span class="pair">BTC/USDT</span>
+      <span class="change">+0.30%</span>
+    </div>
+    <div class="price">
+      <strong>64,556</strong>
+    </div>
+    <div class="chart">
+      <svg viewBox="0 0 280 48" preserveAspectRatio="none" aria-hidden="true">
+        <polyline
+          fill="none"
+          stroke="#000"
+          stroke-width="1.5"
+          stroke-linejoin="round"
+          stroke-linecap="round"
+          points="0,28 12,26 24,30 36,22 48,24 60,18 72,20 84,16 96,19 108,14 120,21 132,17 144,26 156,22 168,18 180,20 192,15 204,12 216,16 228,10 240,13 252,8 268,9 280,9"
+        />
+        <circle cx="280" cy="9" r="2" fill="#000" />
+      </svg>
+    </div>
+
+    <div class="compact">
+      <span class="compact-pair">ETH/USDT</span>
+      <span class="compact-price">1,889</span>
+      <span class="compact-change">+0.83%</span>
+    </div>
+
+    <div class="footer">
+      <span class="wordmark">TICKBYTE</span>
+      <span class="quit">[ QUIT ]</span>
+    </div>
+  </aside>
+</body>
+</html>
