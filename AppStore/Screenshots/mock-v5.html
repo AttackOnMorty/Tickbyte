@@ -19,28 +19,24 @@
     html, body { width: 1440px; height: 900px; overflow: hidden; }
     body {
       display: flex;
-      align-items: stretch;
-      justify-content: space-between;
+      align-items: center;
+      justify-content: center;
       gap: 48px;
-      padding: 36px 40px;
+      padding: 48px 56px;
       background: #F3EFE6;
       color: #111;
     }
 
-    .brand {
-      flex: 1 1 auto;
-      min-width: 0;
-      display: flex;
-      flex-direction: column;
-    }
+    .brand { flex: 0 0 auto; }
     .identity {
       display: flex;
       align-items: center;
       gap: 16px;
+      margin-bottom: 28px;
     }
     .identity img {
-      width: 72px;
-      height: 72px;
+      width: 68px;
+      height: 68px;
       border-radius: 14px;
     }
     .identity span {
@@ -50,37 +46,26 @@
       letter-spacing: 0.12em;
     }
     h1 {
-      margin-top: 80px;
       font-family: "Space Grotesk", sans-serif;
-      font-size: 80px;
+      font-size: 76px;
       font-weight: 700;
       letter-spacing: -0.035em;
       line-height: 0.9;
       text-transform: uppercase;
     }
-    .lockup { margin-top: auto; }
-    .lede, .tag {
+    .lede {
+      margin-top: 28px;
       font-family: "Space Mono", monospace;
       font-size: 16px;
       letter-spacing: 0.1em;
       text-transform: uppercase;
+      color: #8A8680;
     }
-    .lede { color: #8A8680; }
-    .rule {
-      margin: 24px 0 20px;
-      border: none;
-      border-top: 1px solid #111;
-      width: 100%;
-    }
-    .tag { color: #111; }
 
     .panel {
-      flex: 0 0 500px;
-      width: 500px;
-      align-self: center;
-      display: flex;
-      flex-direction: column;
-      padding: 36px 36px 28px;
+      flex: 0 0 480px;
+      width: 480px;
+      padding: 40px 40px 32px;
       background: #F7F5F1;
       border: 1px solid #D9D4CB;
       border-radius: 14px;
@@ -90,7 +75,7 @@
       justify-content: space-between;
       align-items: baseline;
     }
-    .pair, .compact-pair, .quit, .wordmark {
+    .pair, .compact-pair, .quit {
       font-family: "Space Mono", monospace;
       font-size: 13px;
       letter-spacing: 0.08em;
@@ -114,7 +99,7 @@
       display: flex;
       align-items: center;
       min-height: 56px;
-      margin-top: 64px;
+      margin-top: 56px;
     }
     .compact-pair { flex: 1; }
     .compact-price {
@@ -130,15 +115,9 @@
     .footer {
       display: flex;
       align-items: center;
-      justify-content: space-between;
-      margin-top: 32px;
+      justify-content: flex-end;
+      margin-top: 40px;
       min-height: 48px;
-    }
-    .wordmark {
-      font-family: "Space Grotesk", sans-serif;
-      letter-spacing: 0;
-      text-transform: none;
-      color: #B0AAA2;
     }
   </style>
 </head>
@@ -149,11 +128,7 @@
       <span>TICKBYTE</span>
     </div>
     <h1>Live crypto.<br>Right in your<br>menu bar.</h1>
-    <div class="lockup">
-      <p class="lede">See BTC + ETH move in real time.</p>
-      <hr class="rule" />
-      <p class="tag">No account · No ads · No polling</p>
-    </div>
+    <p class="lede">See BTC + ETH move in real time.</p>
   </section>
 
   <aside class="panel">
@@ -181,7 +156,6 @@
       <span class="compact-change">+0.83%</span>
     </div>
     <div class="footer">
-      <span class="wordmark">TICKBYTE</span>
       <span class="quit">[ QUIT ]</span>
     </div>
   </aside>
