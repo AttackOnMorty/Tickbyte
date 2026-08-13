@@ -63,7 +63,7 @@ protocol TickerPanelViewDelegate: AnyObject {
 
 // MARK: - Hero
 
-/// The one primary on the board: Doto price and a UTC-day sparkline.
+/// The one primary on the board: Space Mono price and a UTC-day sparkline.
 /// Quote and window stay off the number — `BTC/USDT` already names the pair.
 final class HeroCoinView: NSView {
     private let pairLabel: NothingLabel
@@ -83,9 +83,8 @@ final class HeroCoinView: NSView {
             alignment: .right
         )
         priceLabel = NothingLabel(
-            font: NothingTheme.display(size: NothingTheme.TypeSize.hero),
-            color: NothingTheme.Palette.textDisplay,
-            tracking: NothingTheme.displayTracking
+            font: NothingTheme.data(size: NothingTheme.TypeSize.hero),
+            color: NothingTheme.Palette.textDisplay
         )
         dayChartView = DayChartView()
         super.init(frame: .zero)

@@ -46,11 +46,12 @@ enum NothingTheme {
 
     // MARK: - Type
 
-    /// Bundled families. Doto is the one pattern-break — the focused hero price.
-    /// Space Mono carries every other number and ALL-CAPS label. Space Grotesk is
-    /// the quiet wordmark. Both variable faces resolve through a descriptor
-    /// because their named instances ("SpaceGrotesk-Light_Medium") are not addressable
-    /// by PostScript name.
+    /// Bundled families. Space Mono carries every live number and ALL-CAPS label,
+    /// including the hero price. Doto stays the brand face (app icon), not a
+    /// data face — sparse dots fail at a glance. Space Grotesk is the quiet
+    /// wordmark. Both variable faces resolve through a descriptor because their
+    /// named instances ("SpaceGrotesk-Light_Medium") are not addressable by
+    /// PostScript name.
     private enum Family {
         static let display = "Doto"
         static let body = "Space Grotesk"

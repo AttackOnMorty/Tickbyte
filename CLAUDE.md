@@ -69,7 +69,7 @@ The Nothing system in one paragraph: three layers of importance per screen and n
 
 - **Tokens live in `NothingTheme`** — colour, type, spacing, metrics. No hex literal or point size belongs in view code. Dark and light are equal: every surface/text colour is a dynamic `NSColor`, so a view works in both without branching.
 - **`cgColor` freezes the appearance current at resolution time.** Any layer-backed view reading a dynamic colour must do it inside `effectiveAppearance.performAsCurrentDrawingAppearance { }` and re-resolve on `viewDidChangeEffectiveAppearance()`, or it stays stuck in whichever mode drew it first.
-- **The panel's one pattern-break is the focused hero price** in Doto. The compact row and the menu bar stay in Space Mono. If something needs more emphasis, take it from the hero or move it.
+- **Live prices are Space Mono**, including the hero. Doto is the brand face on the icon, not a data face — dotted glyphs fail at a glance. If something needs more emphasis, take it from the hero size or move it.
 - **Three layers, not two equal instruments.** Hero price is primary; the compact row is secondary; wordmark and `[ QUIT ]` are tertiary. Only the hero draws a sparkline. The pair label already names the quote — do not repeat `USDT` or a period (`UTC` / `24H`) beside the number.
 - **Three type sizes on the panel** (`TypeSize.hero` / `.value` / `.label`) and one on the menu bar. A fourth size is almost always a spacing problem — add distance instead.
 - **Light panel is a white card** (`Palette.panel`) on paper; dark panel is OLED black. Radius is the dropdown token (8).
