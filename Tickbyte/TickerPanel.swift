@@ -145,16 +145,15 @@ final class HeroCoinView: NSView {
     }
 
     /// Paint tape on the hero for one tick, then return to ink. The number stays
-    /// sharp — colour is the event. Reduced motion just sets the number.
+    /// sharp — colour is the event.
     private func flashLastPrint(to newPrice: String) {
         let previous = priceLabel.text
         // A same-display print must not cancel an in-flight tick (ETH updates used to).
         guard previous != newPrice else { return }
         priceLabel.text = newPrice
-        let reduceMotion = NSWorkspace.shared.accessibilityDisplayShouldReduceMotion
         let direction = PanelText.lastPrintDirection(from: previous, to: newPrice)
-        logger.info("hero \(previous, privacy: .public) -> \(newPrice, privacy: .public) \(String(describing: direction), privacy: .public) reduceMotion=\(reduceMotion)")
-        guard !previous.isEmpty, direction != .flat, !reduceMotion else {
+        logger.info("hero \(previous, privacy: .public) -> \(newPrice, privacy: .public) \(String(describing: direction), privacy: .public)")
+        guard !previous.isEmpty, direction != .flat else {
             flashGeneration += 1
             priceLabel.apply(color: NothingTheme.Palette.textDisplay)
             return
