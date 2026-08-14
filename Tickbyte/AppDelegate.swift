@@ -145,9 +145,8 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         return StatusBarText.make(items: items)
     }
 
-    /// Values keep full display contrast while ticker labels use the same adaptive colour
-    /// at reduced opacity. This preserves legibility on the system selection blue without
-    /// using weight to distinguish a label from its value.
+    /// Same size for code and price; colour is the only distinction. Live values
+    /// are `--text-display`, codes `--text-secondary`, failed items `--text-disabled`.
     private func attributedStatusTitle(_ title: StatusBarText.Title) -> NSAttributedString {
         let result = NSMutableAttributedString(
             string: title.text,
@@ -159,14 +158,14 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         for range in title.codeRanges {
             result.addAttribute(
                 .foregroundColor,
-                value: NothingTheme.Palette.textDisplay.withAlphaComponent(0.60),
+                value: NothingTheme.Palette.textSecondary,
                 range: range
             )
         }
         for range in title.staleRanges {
             result.addAttribute(
                 .foregroundColor,
-                value: NothingTheme.Palette.textDisplay.withAlphaComponent(0.60),
+                value: NothingTheme.Palette.textDisabled,
                 range: range
             )
         }
@@ -188,10 +187,8 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         }
     }
 
-    /// - Parameter animatePrice: true only for a live print the user is watching.
-    ///   Open, REST refresh, connection, and focus just set the number.
-    private func refreshPanel(animatePrice: Bool = false) {
-        panelController.contentView.update(with: makeSnapshot(), animatePrice: animatePrice)
+    private func refreshPanel() {
+        panelController.contentView.update(with: makeSnapshot())
     }
 
     private func makeSnapshot() -> PanelSnapshot {
@@ -235,11 +232,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     /// status-bar timer already covers the visible UI, so we do nothing (F6).
     @objc private func dataDidChange(_ notification: Notification) {
         guard webSocketManager.isPanelVisible else { return }
-        let changed = notification.object as? String
-        // Only the hero flashes, and only for its own print. An ETH trade used to
-        // refresh the board as "animated" and wipe BTC's tape tick back to ink.
-        let animatePrice = notification.name == .priceUpdated && changed == focusedSymbol
-        refreshPanel(animatePrice: animatePrice)
+        refreshPanel()
     }
 }
 

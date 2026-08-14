@@ -82,32 +82,14 @@ enum PanelText {
         return Change(text: PriceFormatter.percent(raw), direction: direction)
     }
 
-    /// East-Asian tape: red marks an advance, green a decline. Zero stays
-    /// disabled — it is not a move.
+    /// Tape: red marks an advance, green a decline. Zero stays disabled —
+    /// it is not a move (ADR 0003).
     static func changeColorRole(_ direction: Direction) -> ColorRole {
         switch direction {
         case .up: return .accent
         case .down: return .success
         case .flat: return .disabled
         }
-    }
-
-    /// This print versus the last displayed print — not versus the day.
-    /// Unparseable or equal strings are flat, so the hero does not flash.
-    static func lastPrintDirection(from previous: String, to next: String) -> Direction {
-        guard let before = displayPriceValue(previous), let after = displayPriceValue(next) else {
-            return .flat
-        }
-        if after > before { return .up }
-        if after < before { return .down }
-        return .flat
-    }
-
-    /// Inverse of `PriceFormatter.price`: strip the grouping commas it inserted.
-    private static func displayPriceValue(_ text: String) -> Double? {
-        let stripped = text.replacingOccurrences(of: ",", with: "")
-        guard let value = Double(stripped), value.isFinite else { return nil }
-        return value
     }
 }
 

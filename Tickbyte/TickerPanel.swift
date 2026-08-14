@@ -65,13 +65,12 @@ protocol TickerPanelViewDelegate: AnyObject {
 
 /// The one primary on the board: Space Mono price and a UTC-day sparkline.
 /// Quote and window stay off the number — `BTC/USDT` already names the pair.
+/// Pair is `--label` (11). Change is `--body` (16) — a value, not a second label.
 final class HeroCoinView: NSView {
     private let pairLabel: NothingLabel
     private let changeLabel: NothingLabel
     private let priceLabel: NothingLabel
     private let dayChartView: DayChartView
-    /// Cancels a pending ink restore when a newer print arrives mid-tick.
-    private var flashGeneration = 0
 
     init() {
         pairLabel = NothingLabel(
@@ -128,48 +127,19 @@ final class HeroCoinView: NSView {
     @available(*, unavailable)
     required init?(coder: NSCoder) { fatalError("init(coder:) has not been implemented") }
 
-    func update(with coin: PanelSnapshot.Coin, animated: Bool = false) {
+    func update(with coin: PanelSnapshot.Coin) {
         pairLabel.text = coin.pair
         changeLabel.text = coin.change.text
         changeLabel.textColor = PanelText.changeColorRole(coin.change.direction).color
-        if animated {
-            flashLastPrint(to: coin.price)
-        } else if priceLabel.text != coin.price {
-            flashGeneration += 1
-            priceLabel.text = coin.price
-            priceLabel.apply(color: NothingTheme.Palette.textDisplay)
-        }
+        priceLabel.text = coin.price
         dayChartView.state = coin.dayChart
-    }
-
-    /// Paint tape on the hero for one tick, then return to ink. The number stays
-    /// sharp — colour is the event.
-    private func flashLastPrint(to newPrice: String) {
-        let previous = priceLabel.text
-        // A same-display print must not cancel an in-flight tick (ETH updates used to).
-        guard previous != newPrice else { return }
-        priceLabel.text = newPrice
-        let direction = PanelText.lastPrintDirection(from: previous, to: newPrice)
-        guard !previous.isEmpty, direction != .flat else {
-            flashGeneration += 1
-            priceLabel.apply(color: NothingTheme.Palette.textDisplay)
-            return
-        }
-
-        priceLabel.apply(color: PanelText.changeColorRole(direction).color)
-        priceLabel.displayIfNeeded()
-        flashGeneration += 1
-        let generation = flashGeneration
-        DispatchQueue.main.asyncAfter(deadline: .now() + NothingTheme.Metric.printFlash) { [weak self] in
-            guard let self, self.flashGeneration == generation else { return }
-            self.priceLabel.apply(color: NothingTheme.Palette.textDisplay)
-        }
     }
 }
 
 // MARK: - Compact row
 
 /// Secondary coin: one stat row. Click promotes it into the hero slot.
+/// Pair is `--label` (11). Price and change stay `--body` (16).
 final class CompactCoinView: NSControl {
     private let pairLabel: NothingLabel
     private let priceLabel: NothingLabel
@@ -185,10 +155,10 @@ final class CompactCoinView: NSControl {
         )
         priceLabel = NothingLabel(
             font: NothingTheme.data(size: NothingTheme.TypeSize.value),
-            color: NothingTheme.Palette.textDisplay
+            color: NothingTheme.Palette.textPrimary
         )
         changeLabel = NothingLabel(
-            font: NothingTheme.data(size: NothingTheme.TypeSize.label),
+            font: NothingTheme.data(size: NothingTheme.TypeSize.value),
             color: NothingTheme.Palette.textDisabled,
             alignment: .right
         )
@@ -399,7 +369,7 @@ final class TickerPanelView: NSView {
 
     // MARK: Refresh
 
-    func update(with snapshot: PanelSnapshot, animatePrice: Bool = false) {
+    func update(with snapshot: PanelSnapshot) {
         let statusText = snapshot.feedStatus.footerText
         statusLabel.text = statusText ?? ""
         statusLabel.isHidden = statusText == nil
@@ -412,7 +382,7 @@ final class TickerPanelView: NSView {
         let bySymbol = Dictionary(uniqueKeysWithValues: snapshot.coins.map { ($0.symbol, $0) })
 
         if let heroSymbol = board.hero, let coin = bySymbol[heroSymbol] {
-            heroSection.update(with: coin, animated: animatePrice)
+            heroSection.update(with: coin)
             heroSection.isHidden = false
         } else {
             heroSection.isHidden = true

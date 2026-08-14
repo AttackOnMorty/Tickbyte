@@ -13,10 +13,19 @@ import AppKit
 /// ALL-CAPS labels are unreadable without it.
 final class NothingLabel: NSTextField {
     private let tracking: CGFloat
+    private let lineHeight: CGFloat?
 
     /// - Parameter tracking: letter spacing in em, matching the design token.
-    init(font: NSFont, color: NSColor, tracking: CGFloat = 0, alignment: NSTextAlignment = .left) {
+    /// - Parameter lineHeight: optional multiplier of the point size (`--display-lg` is 1.05).
+    init(
+        font: NSFont,
+        color: NSColor,
+        tracking: CGFloat = 0,
+        alignment: NSTextAlignment = .left,
+        lineHeight: CGFloat? = nil
+    ) {
         self.tracking = tracking
+        self.lineHeight = lineHeight
         super.init(frame: .zero)
         isEditable = false
         isSelectable = false
@@ -61,6 +70,11 @@ final class NothingLabel: NSTextField {
         }
         let paragraph = NSMutableParagraphStyle()
         paragraph.alignment = alignment
+        if let lineHeight {
+            let height = lineHeight * font.pointSize
+            paragraph.minimumLineHeight = height
+            paragraph.maximumLineHeight = height
+        }
         attributes[.paragraphStyle] = paragraph
         attributedStringValue = NSAttributedString(string: text, attributes: attributes)
         invalidateIntrinsicContentSize()

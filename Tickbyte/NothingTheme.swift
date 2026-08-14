@@ -13,12 +13,12 @@ enum NothingTheme {
 
     // MARK: - Colour
 
-    /// Dark reads as an instrument panel in a dark room (OLED black, data glowing);
-    /// light reads as a printed technical manual (off-white paper, black ink). Every
-    /// text/surface token is dynamic so a single view works in both.
+    /// Page tokens: OLED black / off-white paper. The Board is OLED black
+    /// in the dark and a white card in the light. Every text/surface token
+    /// is dynamic so a single view works in both modes.
     enum Palette {
         static let background = dynamic(dark: 0x000000, light: 0xF5F5F5)
-        /// Dropdown fill: OLED black in the dark, white card on paper in the light.
+        /// Board fill: instrument black / white card. Not `--surface-raised`.
         static let panel = dynamic(dark: 0x000000, light: 0xFFFFFF)
         static let border = dynamic(dark: 0x222222, light: 0xE8E8E8)
         static let borderVisible = dynamic(dark: 0x333333, light: 0xCCCCCC)
@@ -27,12 +27,11 @@ enum NothingTheme {
         static let textPrimary = dynamic(dark: 0xE8E8E8, light: 0x1A1A1A)
         static let textDisplay = dynamic(dark: 0xFFFFFF, light: 0x000000)
 
-        /// Status colours are identical in both modes — they encode data, not chrome.
-        /// `accent` is the interrupt: nothing else on screen may use it.
+        /// Tape green/red encode a print, not chrome. `accent` is also the
+        /// `[LOST]` interrupt. Light-mode green is a darker fork so 16px
+        /// type still contrasts on the white card (ADR 0003).
         static let accent = NSColor(rgb: 0xD71921)
         static let success = NSColor(rgb: 0x4A9E5C)
-        /// Paper-side fork of `success`: 16pt green on `#FFFFFF` needs a darker ink
-        /// to stay above normal-text contrast. Dark mode keeps the canonical token.
         static let successOnPaper = dynamic(dark: 0x4A9E5C, light: 0x2E7D42)
         static let warning = NSColor(rgb: 0xD4A843)
 
@@ -46,12 +45,11 @@ enum NothingTheme {
 
     // MARK: - Type
 
-    /// Bundled families. Space Mono carries every live number and ALL-CAPS label,
-    /// including the hero price. Doto stays the brand face (app icon), not a
-    /// data face — sparse dots fail at a glance. Space Grotesk is the quiet
-    /// wordmark. Both variable faces resolve through a descriptor because their
-    /// named instances ("SpaceGrotesk-Light_Medium") are not addressable by
-    /// PostScript name.
+    /// Bundled families. Space Mono carries every live number and ALL-CAPS
+    /// label, including the Hero price. Doto is the Motif on the icon, not
+    /// a data face. Space Grotesk is the quiet Wordmark. Variable faces
+    /// resolve through a descriptor because their named instances are not
+    /// addressable by PostScript name.
     private enum Family {
         static let display = "Doto"
         static let body = "Space Grotesk"
@@ -72,6 +70,8 @@ enum NothingTheme {
     /// legends rather than shouting. Doto at display size tightens the opposite way.
     static let labelTracking: CGFloat = 0.08
     static let displayTracking: CGFloat = -0.02
+    /// `--display-lg` line-height. Applied only to the hero number.
+    static let displayLineHeight: CGFloat = 1.05
 
     static func display(size: CGFloat) -> NSFont {
         resolve(Family.display, size: size, weight: .regular)
@@ -128,14 +128,12 @@ enum NothingTheme {
         static let sectionGap: CGFloat = 48
         static let cornerRadius: CGFloat = 8
         static let hairline: CGFloat = 1
-        static let chartHeight: CGFloat = 32
+        static let chartHeight: CGFloat = 48
         /// Gap between the status-bar button and the top of the panel.
-        static let panelOffset: CGFloat = 6
+        static let panelOffset: CGFloat = 8
         static let buttonTarget: CGFloat = 44
         /// Transitions are percussive — a short ease-out, never a spring.
         static let transition: TimeInterval = 0.15
-        /// Last-print tape. Nothing micro token — a tick, not a linger.
-        static let printFlash: TimeInterval = 0.15
     }
 }
 
