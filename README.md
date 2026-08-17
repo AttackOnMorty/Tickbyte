@@ -3,7 +3,7 @@
 Real-time Bitcoin and Ethereum prices in the Mac menu bar — the moment a trade happens.
 
 <p align="center">
-  <img src="AppStore/Screenshots/Tickbyte-1440x900-v5.png" alt="Tickbyte" width="720">
+  <img src="AppStore/Screenshots/Tickbyte-1440x900-v6.png" alt="Tickbyte" width="720">
 </p>
 
 <p align="center">
