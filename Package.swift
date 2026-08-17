@@ -17,6 +17,7 @@ let package = Package(
             path: "Tickbyte",
             exclude: [
                 "TickbyteApp.swift",
+                "AppIcon.icon",
                 "Assets.xcassets",
                 "Preview Content",
                 "Tickbyte.entitlements",

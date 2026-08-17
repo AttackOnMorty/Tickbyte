@@ -46,12 +46,10 @@ enum NothingTheme {
     // MARK: - Type
 
     /// Bundled families. Space Mono carries every live number and ALL-CAPS
-    /// label, including the Hero price. Doto is the Motif on the icon, not
-    /// a data face. Space Grotesk is the quiet Wordmark. Variable faces
-    /// resolve through a descriptor because their named instances are not
-    /// addressable by PostScript name.
+    /// label, including the Hero price. Space Grotesk is the quiet Wordmark.
+    /// Variable faces resolve through a descriptor because their named
+    /// instances are not addressable by PostScript name.
     private enum Family {
-        static let display = "Doto"
         static let body = "Space Grotesk"
         static let data = "Space Mono"
     }
@@ -67,16 +65,8 @@ enum NothingTheme {
     }
 
     /// ALL-CAPS labels need the wide 0.08em tracking that makes them read as instrument
-    /// legends rather than shouting. Doto at display size tightens the opposite way.
+    /// legends rather than shouting.
     static let labelTracking: CGFloat = 0.08
-    static let displayTracking: CGFloat = -0.02
-    /// `--display-lg` line-height. Applied only to the hero number.
-    static let displayLineHeight: CGFloat = 1.05
-
-    static func display(size: CGFloat) -> NSFont {
-        resolve(Family.display, size: size, weight: .regular)
-            ?? .monospacedDigitSystemFont(ofSize: size, weight: .medium)
-    }
 
     static func data(size: CGFloat, weight: NSFont.Weight = .regular) -> NSFont {
         resolve(Family.data, size: size, weight: weight)
