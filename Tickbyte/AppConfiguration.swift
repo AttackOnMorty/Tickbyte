@@ -30,6 +30,8 @@ struct AppConfiguration {
 
     struct UserDefaultsKeys {
         static let selectedCryptos = "selectedCryptos"
+        /// The coin in the panel's hero slot — and therefore the one the menu bar shows.
+        static let focusedSymbol = "focusedSymbol"
     }
 
     struct Logging {

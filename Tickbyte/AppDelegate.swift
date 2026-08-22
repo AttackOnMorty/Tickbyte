@@ -19,10 +19,19 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     private var statusBarTimer: Timer?
     private var lastStatusTitle: StatusBarText.Title?
     private var lastPanelFetch: Date?
-    /// Which coin occupies the panel's hero slot. Session-only — not persisted.
-    private var focusedSymbol: String = SymbolCatalog.supported[0]
+    /// Which coin occupies the panel's hero slot — and, by the same token, the menu bar.
+    /// Persisted: it is the one preference the user expresses, so it must survive a
+    /// relaunch. Loaded through the `SymbolCatalog` whitelist like every stored symbol.
+    private var focusedSymbol: String {
+        didSet {
+            UserDefaults.standard.set(focusedSymbol, forKey: AppConfiguration.UserDefaultsKeys.focusedSymbol)
+        }
+    }
 
     override init() {
+        let stored = UserDefaults.standard.string(forKey: AppConfiguration.UserDefaultsKeys.focusedSymbol)
+        focusedSymbol = SymbolCatalog.validSymbols(from: [stored].compactMap { $0 }).first
+            ?? SymbolCatalog.supported[0]
         super.init()
     }
 
@@ -128,44 +137,42 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         button.attributedTitle = attributedStatusTitle(title)
     }
 
+    /// The menu bar shows one coin: the panel's hero. Two equal-weight prices side by
+    /// side were two primaries competing, and too wide for a crowded bar. Picking the
+    /// coin through `PanelBoard` — the same function the panel uses — means the bar and
+    /// the hero slot can never disagree.
     private func createStatusBarTitle() -> StatusBarText.Title {
-        let items = webSocketManager.selectedSymbols.compactMap { symbol -> StatusBarText.Item? in
-            guard let price = webSocketManager.prices[symbol] else { return nil }
-            let isStale: Bool
-            switch webSocketManager.connectionStates[symbol] {
-            case .disconnected, .error: isStale = true
-            case .connecting, .connected, .none: isStale = false
-            }
-            return StatusBarText.Item(
-                code: SymbolCatalog.displayCode(for: symbol),
-                price: price,
-                isStale: isStale
-            )
+        let board = PanelBoard.arrange(focused: focusedSymbol, symbols: webSocketManager.selectedSymbols)
+        guard let symbol = board.hero, let price = webSocketManager.prices[symbol] else {
+            return StatusBarText.make(items: [])
         }
-        return StatusBarText.make(items: items)
+        let isStale: Bool
+        switch webSocketManager.connectionStates[symbol] {
+        case .disconnected, .error: isStale = true
+        case .connecting, .connected, .none: isStale = false
+        }
+        let item = StatusBarText.Item(
+            code: SymbolCatalog.displayCode(for: symbol),
+            price: price,
+            isStale: isStale
+        )
+        return StatusBarText.make(items: [item])
     }
 
-    /// Same size for code and price; colour is the only distinction. Live values
-    /// are `--text-display`, codes `--text-secondary`, failed items `--text-disabled`.
+    /// One size and one opaque ink for code and price (`NothingTheme.MenuBar` explains
+    /// why the bar gets no secondary grey); a failed item dims as a whole.
     private func attributedStatusTitle(_ title: StatusBarText.Title) -> NSAttributedString {
         let result = NSMutableAttributedString(
             string: title.text,
             attributes: [
                 .font: NothingTheme.data(size: NothingTheme.TypeSize.menuBar),
-                .foregroundColor: NothingTheme.Palette.textDisplay,
+                .foregroundColor: NothingTheme.MenuBar.ink,
             ]
         )
-        for range in title.codeRanges {
-            result.addAttribute(
-                .foregroundColor,
-                value: NothingTheme.Palette.textSecondary,
-                range: range
-            )
-        }
         for range in title.staleRanges {
             result.addAttribute(
                 .foregroundColor,
-                value: NothingTheme.Palette.textDisabled,
+                value: NothingTheme.MenuBar.stale,
                 range: range
             )
         }
@@ -248,5 +255,7 @@ extension AppDelegate: TickerPanelViewDelegate {
         guard SymbolCatalog.supported.contains(symbol), symbol != focusedSymbol else { return }
         focusedSymbol = symbol
         refreshPanel()
+        // The bar follows the hero; don't make the user wait for the next 1 Hz tick.
+        updateStatusBarTitle()
     }
 }

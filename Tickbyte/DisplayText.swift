@@ -130,9 +130,11 @@ enum StatusBarText {
     /// colour shifts count as changes, which a plain string comparison would miss.
     struct Title: Equatable {
         let text: String
-        /// Ticker codes of live items — secondary weight.
+        /// Ticker codes of live items. The bar currently draws these in the same ink as
+        /// the prices (`NothingTheme.MenuBar`); the split is kept so the title stays a
+        /// structured description rather than a string to be re-parsed.
         let codeRanges: [NSRange]
-        /// Prices of live items — display weight.
+        /// Prices of live items.
         let valueRanges: [NSRange]
         /// Whole items whose sockets have genuinely failed — dimmed, never hidden.
         let staleRanges: [NSRange]

@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## What this is
 
-A lightweight macOS **menu bar** app showing real-time crypto prices via the Binance WebSocket + REST API. No main window — it lives entirely in the status bar (`NSStatusItem`) with a custom dropdown panel. Shows BTC and ETH; one coin occupies the panel's hero slot and the other sits in a compact row you click to promote. There is no search — the coin set is fixed.
+A lightweight macOS **menu bar** app showing real-time crypto prices via the Binance WebSocket + REST API. No main window — it lives entirely in the status bar (`NSStatusItem`) with a custom dropdown panel. Shows BTC and ETH; one coin occupies the panel's hero slot and the other sits in a compact row you click to promote. The menu bar shows the hero coin only — promoting a coin in the panel is what puts it in the bar. There is no search — the coin set is fixed.
 
 The interface follows the **Nothing** design system: monochrome, typographically driven, colour only where it encodes data status. See `## Design system` below before changing anything visual.
 
@@ -28,7 +28,7 @@ Entry point is `TickbyteApp.swift` (`@main`, SwiftUI `App` with an empty `Settin
 
 Two cooperating layers:
 
-- **`AppDelegate`** — owns the `NSStatusItem` and the panel controller. Renders state to the UI; holds no market data of its own. It does own one piece of *view* state, `focusedSymbol` (which coin sits in the panel's hero slot), deliberately not persisted.
+- **`AppDelegate`** — owns the `NSStatusItem` and the panel controller. Renders state to the UI; holds no market data of its own. It does own one piece of *view* state, `focusedSymbol` (which coin sits in the panel's hero slot and therefore in the menu bar), persisted in `UserDefaults` and whitelisted through `SymbolCatalog.validSymbols` on load.
 - **`TickerPanelController` / `TickerPanelView`** — the dropdown. A borderless `NSPanel`, not an `NSMenu` or `NSPopover`: both of those impose a system material, a shadow and a fixed row shape, and the design needs a flat surface with one hairline border and no shadow. The controller re-implements what `NSMenu` gave for free — positioning under the status item, dismissal on outside click and on Escape.
 - **`WebSocketManager`** — owns *all* market state (`prices`, `priceChanges`, `selectedSymbols`, `connectionStates`) and all networking. The single source of truth.
 
@@ -42,7 +42,7 @@ Both `AppDelegate` and `WebSocketManager` are `@MainActor`. **All mutable state 
 
 1. At launch `WebSocketManager` REST-fetches prices for the **selected** symbols only, then opens a `@trade` WebSocket per selected symbol. Prices for all supported coins are refreshed (debounced) when the panel opens.
 2. Live trade messages update `prices`; `.priceUpdated` is posted **only while the panel is visible** (`isPanelVisible`) — when closed, the 1 Hz status-bar timer reads state directly, so per-trade notifications would be wasted work.
-3. Status bar title: rebuilt every 1s by a timer, but `button.attributedTitle` is only assigned when the title actually changed. `StatusBarText.Title` is `Equatable` so a *colour-only* change (an item going stale at the same price) still counts as a change.
+3. Status bar title: shows the hero coin only, chosen via `PanelBoard.arrange` (the same call the panel uses, so bar and hero slot cannot disagree). Rebuilt every 1s by a timer (and immediately on a focus change), but `button.attributedTitle` is only assigned when the title actually changed. `StatusBarText.Title` is `Equatable` so a *colour-only* change (an item going stale at the same price) still counts as a change.
 4. Panel: every view is built once in `TickerPanelView.init` for the fixed symbol list and refreshed in place through `update(with:)` — never rebuilt. `AppDelegate` resolves a `PanelSnapshot` and hands it over; the view holds no market state, exactly as the menu it replaced did not.
 
 ### Connection resilience
@@ -68,6 +68,7 @@ When adding behavior to networking or rendering, prefer extending these pure typ
 The Nothing system in one paragraph: three layers of importance per screen and no more; type carries hierarchy, not colour; spacing carries grouping, not dividers; monochrome canvas with status colour applied to the **value** only; exactly one pattern-break per screen. Anti-patterns to keep out: gradients, shadows, blur, filled or multi-colour icons, emoji as UI, spring easing, skeleton loaders, toasts.
 
 - **Tokens live in `NothingTheme`** — colour, type, spacing, metrics. No hex literal or point size belongs in view code. Dark and light are equal: every surface/text colour is a dynamic `NSColor`, so a view works in both without branching.
+- **The menu bar is not our canvas.** It is a vibrant system surface over the wallpaper: its compositing tints any mid-grey toward the wallpaper's complement (`#999999` renders tan over a blue desktop) and any translucent ink (including the system `secondaryLabelColor`) loses font smoothing and reads blurred. Only the opaque extreme survives, so the status-bar title uses one ink for code and value (`NothingTheme.MenuBar.ink` = `textDisplay`); a stale item dims to `MenuBar.stale`. Do not reintroduce a secondary grey or an alpha colour on the bar.
 - **`cgColor` freezes the appearance current at resolution time.** Any layer-backed view reading a dynamic colour must do it inside `effectiveAppearance.performAsCurrentDrawingAppearance { }` and re-resolve on `viewDidChangeEffectiveAppearance()`, or it stays stuck in whichever mode drew it first.
 - **Live prices are Space Mono**, including the hero. The dotted icon is a custom brand motif, not a data face — dotted glyphs fail at a glance. If something needs more emphasis, take it from the hero size or move it.
 - **Three layers, not two equal instruments.** Hero price is primary; the compact row is secondary; wordmark and `[ QUIT ]` are tertiary. Only the hero draws a sparkline. The pair label already names the quote — do not repeat `USDT` or a period (`UTC` / `24H`) beside the number.

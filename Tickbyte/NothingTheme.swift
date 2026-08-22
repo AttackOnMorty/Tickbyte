@@ -43,6 +43,18 @@ enum NothingTheme {
         }
     }
 
+    /// The menu bar is a vibrant system surface over the user's wallpaper — not our
+    /// canvas. Its compositing tints any mid-grey toward the wallpaper's complement (a
+    /// `#999999` code rendered tan over a blue desktop) and any translucent ink loses
+    /// font smoothing and reads blurred. Only the opaque extreme survives untouched, so
+    /// code and value share one ink — the platform's own single-colour convention — and
+    /// the label/value distinction stays on the panel. A stale item still dims to
+    /// `textDisabled`: a tinted dim is still dim.
+    enum MenuBar {
+        static let ink = Palette.textDisplay
+        static let stale = Palette.textDisabled
+    }
+
     // MARK: - Type
 
     /// Bundled families. Space Mono carries every live number and ALL-CAPS
