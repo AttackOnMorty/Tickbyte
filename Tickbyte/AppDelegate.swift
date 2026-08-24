@@ -19,8 +19,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     private var statusBarTimer: Timer?
     private var lastStatusTitle: StatusBarText.Title?
     private var lastPanelFetch: Date?
-    /// Which coin occupies the panel's hero slot — and, by the same token, the menu bar.
-    /// Persisted: it is the one preference the user expresses, so it must survive a
+    /// Which coin occupies the panel's hero slot. Persisted so the board survives a
     /// relaunch. Loaded through the `SymbolCatalog` whitelist like every stored symbol.
     private var focusedSymbol: String {
         didSet {
@@ -137,26 +136,23 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         button.attributedTitle = attributedStatusTitle(title)
     }
 
-    /// The menu bar shows one coin: the panel's hero. Two equal-weight prices side by
-    /// side were two primaries competing, and too wide for a crowded bar. Picking the
-    /// coin through `PanelBoard` — the same function the panel uses — means the bar and
-    /// the hero slot can never disagree.
+    /// The glance shows every selected coin, in catalog order. The panel's hero slot
+    /// is independent — promoting a coin there does not hide the other from the bar.
     private func createStatusBarTitle() -> StatusBarText.Title {
-        let board = PanelBoard.arrange(focused: focusedSymbol, symbols: webSocketManager.selectedSymbols)
-        guard let symbol = board.hero, let price = webSocketManager.prices[symbol] else {
-            return StatusBarText.make(items: [])
+        let items = webSocketManager.selectedSymbols.compactMap { symbol -> StatusBarText.Item? in
+            guard let price = webSocketManager.prices[symbol] else { return nil }
+            let isStale: Bool
+            switch webSocketManager.connectionStates[symbol] {
+            case .disconnected, .error: isStale = true
+            case .connecting, .connected, .none: isStale = false
+            }
+            return StatusBarText.Item(
+                code: SymbolCatalog.displayCode(for: symbol),
+                price: price,
+                isStale: isStale
+            )
         }
-        let isStale: Bool
-        switch webSocketManager.connectionStates[symbol] {
-        case .disconnected, .error: isStale = true
-        case .connecting, .connected, .none: isStale = false
-        }
-        let item = StatusBarText.Item(
-            code: SymbolCatalog.displayCode(for: symbol),
-            price: price,
-            isStale: isStale
-        )
-        return StatusBarText.make(items: [item])
+        return StatusBarText.make(items: items)
     }
 
     /// One size and one opaque ink for code and price (`NothingTheme.MenuBar` explains
@@ -255,7 +251,5 @@ extension AppDelegate: TickerPanelViewDelegate {
         guard SymbolCatalog.supported.contains(symbol), symbol != focusedSymbol else { return }
         focusedSymbol = symbol
         refreshPanel()
-        // The bar follows the hero; don't make the user wait for the next 1 Hz tick.
-        updateStatusBarTitle()
     }
 }

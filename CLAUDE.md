@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## What this is
 
-A lightweight macOS **menu bar** app showing real-time crypto prices via the Binance WebSocket + REST API. No main window — it lives entirely in the status bar (`NSStatusItem`) with a custom dropdown panel. Shows BTC and ETH; one coin occupies the panel's hero slot and the other sits in a compact row you click to promote. The menu bar shows the hero coin only — promoting a coin in the panel is what puts it in the bar. There is no search — the coin set is fixed.
+A lightweight macOS **menu bar** app showing real-time crypto prices via the Binance WebSocket + REST API. No main window — it lives entirely in the status bar (`NSStatusItem`) with a custom dropdown panel. Shows BTC and ETH; the menu bar lists both, and the panel gives one coin a hero slot with the other in a compact row you click to promote. There is no search — the coin set is fixed.
 
 The interface follows the **Nothing** design system: monochrome, typographically driven, colour only where it encodes data status. See `## Design system` below before changing anything visual.
 
@@ -28,7 +28,7 @@ Entry point is `TickbyteApp.swift` (`@main`, SwiftUI `App` with an empty `Settin
 
 Two cooperating layers:
 
-- **`AppDelegate`** — owns the `NSStatusItem` and the panel controller. Renders state to the UI; holds no market data of its own. It does own one piece of *view* state, `focusedSymbol` (which coin sits in the panel's hero slot and therefore in the menu bar), persisted in `UserDefaults` and whitelisted through `SymbolCatalog.validSymbols` on load.
+- **`AppDelegate`** — owns the `NSStatusItem` and the panel controller. Renders state to the UI; holds no market data of its own. It does own one piece of *view* state, `focusedSymbol` (which coin sits in the panel's hero slot), persisted in `UserDefaults` and whitelisted through `SymbolCatalog.validSymbols` on load.
 - **`TickerPanelController` / `TickerPanelView`** — the dropdown. A borderless `NSPanel`, not an `NSMenu` or `NSPopover`: both of those impose a system material, a shadow and a fixed row shape, and the design needs a flat surface with one hairline border and no shadow. The controller re-implements what `NSMenu` gave for free — positioning under the status item, dismissal on outside click and on Escape.
 - **`WebSocketManager`** — owns *all* market state (`prices`, `priceChanges`, `selectedSymbols`, `connectionStates`) and all networking. The single source of truth.
 
@@ -42,7 +42,7 @@ Both `AppDelegate` and `WebSocketManager` are `@MainActor`. **All mutable state 
 
 1. At launch `WebSocketManager` REST-fetches prices for the **selected** symbols only, then opens a `@trade` WebSocket per selected symbol. Prices for all supported coins are refreshed (debounced) when the panel opens.
 2. Live trade messages update `prices`; `.priceUpdated` is posted **only while the panel is visible** (`isPanelVisible`) — when closed, the 1 Hz status-bar timer reads state directly, so per-trade notifications would be wasted work.
-3. Status bar title: shows the hero coin only, chosen via `PanelBoard.arrange` (the same call the panel uses, so bar and hero slot cannot disagree). Rebuilt every 1s by a timer (and immediately on a focus change), but `button.attributedTitle` is only assigned when the title actually changed. `StatusBarText.Title` is `Equatable` so a *colour-only* change (an item going stale at the same price) still counts as a change.
+3. Status bar title: lists every selected coin (BTC and ETH). Rebuilt every 1s by a timer, but `button.attributedTitle` is only assigned when the title actually changed. `StatusBarText.Title` is `Equatable` so a *colour-only* change (an item going stale at the same price) still counts as a change.
 4. Panel: every view is built once in `TickerPanelView.init` for the fixed symbol list and refreshed in place through `update(with:)` — never rebuilt. `AppDelegate` resolves a `PanelSnapshot` and hands it over; the view holds no market state, exactly as the menu it replaced did not.
 
 ### Connection resilience
